@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc>
+  <web>XWikiTubeCode</web>
+  <name>VideoUploadGroovy</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>XWikiTubeCode.WebHome</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1445335303000</creationDate>
+  <date>1445934490000</date>
+  <contentUpdateDate>1445934490000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <content>/**
+* Groovy class : VideoUpload 
+* This class is used to upload and transcode videos.
+*/
+
+import java.io.File;
+import java.io.FileOutputStream;
+import org.apache.commons.io.FilenameUtils
+import org.apache.commons.io.FileUtils
+import javax.activation.MimetypesFileTypeMap
+
+class VideoUploadClass
+{
+   def xwiki;
+   def xcontext;
+   def services;
+   def userName;
+   def fileUploader;
+   def mediaTranscoder;
+   def commandRunner;
+   def mediaClass = "XWikiTubeCode.MediaClass";
+   def xwikiTubeDir = '/home/user/Bureau/MohamedDocs/apache-tomcat-8.0.21/webapps/mainwiki/xwikitube';
+   def userXWikiTubeDir;
+   FilenameUtils fileNameUtils;
+   FileUtils FileUtils;
+
+   /** Initialize the class */
+   void init(xwiki, xcontext, services)
+   {
+      this.xwiki = xwiki;
+      this.xcontext = xcontext;
+      this.services = services;
+      this.userName = xwiki.getDocument(xcontext.getUser()).getName();
+      this.fileUploader = xwiki.fileupload;
+      this.commandRunner = services.commandRunner;
+      this.mediaTranscoder = xwiki.parseGroovyFromPage("MediaTranscoderCode.MediaTranscoderGroovy")
+      this.mediaTranscoder.init(xwiki, xcontext, services);
+      this.fileNameUtils = new FilenameUtils();
+      this.fileUtils = new FileUtils();
+      // Check if there is an XWikiTube directory in the file system for the current user, if not create it
+      this.userXWikiTubeDir = this.getUserXWikiTubeDir();
+   }
+   
+   /**
+   * Check if a directory exists in the filesytem
+   *
+   * @dirPath the path of the directory
+   * @return true if the directory exist, false otherwise
+   */
+   boolean checkDirExists(dirPath){
+      File dir = new File(dirPath);
+      return dir.exists();
+   }
+
+   /**
+   * Check if a file exists in the filesytem
+   *
+   * @fileDir the directory containing the file
+   * @filePath the name of the file
+   * @return true if the file exist, false otherwise
+   */
+   boolean checkFileExists(fileDir, fileName = ""){
+      File file;
+      if(fileName == ""){
+         file = new File(fileDir);
+      }
+      else
+      {
+         file = new File(fileDir, fileName);
+      }
+      return file.exists();
+   }
+
+   /**
+   * Check if the XWikitube directory of the current user exists in the filesytem,if not create it.
+   *
+   * @user the documentReference of the user, by default the current user.
+   * @return the path of the user's XWikiTube directory
+   */
+   def getUserXWikiTubeDir(user = xcontext.getUser()){
+      String userXWikiTubeDir = "";
+      def xwikiTubeDir = this.xwikiTubeDir;
+      if(!this.checkDirExists(xwikiTubeDir)){
+         File dir = new File(xwikiTubeDir);
+         if (!dir.mkdir()) { throw new RuntimeException("failed to make directory"); }
+      }
+      // Check if the XWikitube user directory exists
+      if(xwiki.exists(user)){
+         userXWikiTubeDir = this.xwikiTubeDir + '/' + user;
+         if(!this.checkDirExists(userXWikiTubeDir)){
+            File userDir = new File(this.xwikiTubeDir, user);
+            if (!userDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
+         }
+      }
+      return userXWikiTubeDir;
+   }        
+
+   /**
+   * create a file from byte code
+   * 
+   * @param fileDir the directory containing the file
+   * @param fileName the name of the file
+   * @param byteCode the byte code of the file
+   * @return a boolean that indicates if the file wa created or not.
+   */
+   boolean createFileFromByteCode(String fileDir, String fileName, byte[] byteCode){
+      File file = new File(fileDir, fileName);
+      FileOutputStream fos = new FileOutputStream(file);
+      fos.write(byteCode);
+      return this.checkFileExists(fileDir, fileName);
+   }
+
+   /**
+   * Upload a video
+   * 
+   * @param formFieldName the file input name
+   * @param encodeVideo boolean that indicate to encode the video or not (Default value: false)
+   * @return true if the upload is succesfull, false if the upload failed.
+   */
+   def uploadVideo(formFieldName, encodeVideo = false){
+      def rep = ["ret": false, "error": ""];
+      def fileItemNames = this.fileUploader.getFileItemNames();
+      for(item in fileItemNames){
+        if(item == formFieldName){
+            def fileName = this.fileUploader.getFileName(item);
+            def byteCode = this.fileUploader.getFileItemData(item);
+            if(!this.checkFileExists(userXWikiTubeDir, fileName)){
+               // Create the file
+               File videoDir = new File(userXWikiTubeDir, fileName);
+               if (!videoDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
+               rep["ret"] = this.createFileFromByteCode(videoDir.getPath(), fileName, byteCode);
+               def filePath = this.fileNameUtils.concat(videoDir.getPath(), fileName);
+               rep["video"] = this.getVideoInfo(filePath);
+               // Create an XWikiTube entry for the uploaded video
+               rep["video"]["videoDocRef"] = this.createVideoEntry(rep["video"]);
+            }
+            else
+            {
+               rep["ret"] = false;
+               rep["error"] = "file_exists";
+            }
+        }
+      }
+      return rep;
+   }
+
+   /**
+   * Create video object
+   * @param videoInfo the video information
+   * @return the video document reference
+   */
+   def createVideoEntry(videoInfo){
+      def rep = "";
+      if(videoInfo){
+         def space = "XWikiTube" + userName;
+         def docName = xwiki.getUniquePageName(space, this.fileNameUtils.getBaseName(videoInfo["name"]));
+         def docRef = space + "." + docName;
+         def videoDoc = xwiki.getDocument(docRef);
+         videoDoc.removeObjects(mediaClass);
+         // Attache the video object
+         def videoID = videoDoc.createNewObject(mediaClass);
+         def videoObj = videoDoc.getObject(mediaClass, videoID);
+         videoObj.set("name", videoInfo.name);
+         videoObj.set("dirPath", videoInfo.dirPath);
+         videoObj.set("extension", videoInfo.extension);
+         videoObj.set("mimeType", videoInfo.mimeType);
+         videoObj.set("resolution", videoInfo.resolution);
+         //videoObj.set("size", videoInfo.size);
+         //videoObj.set("duration", videoInfo.duration);
+         videoDoc.save();
+         rep = docRef;
+      }
+      return rep;
+   }
+
+   /**
+   * Delete media
+   * @param mediaDocRef the document reference of the media
+   * @return a true if succes, false otherwise
+   */
+   def deleteMedia(mediaDocRef){
+      def rep = false;
+      if(mediaDocRef &amp;&amp; mediaDocRef != "" &amp;&amp; xwiki.exists(mediaDocRef)){
+         def mediaDoc = xwiki.getDocument(mediaDocRef);
+         def mediaObject = mediaDoc.getObject(mediaClass);
+         if(mediaObject){
+            def dirPath = mediaObject.getValue("dirPath");
+            try{
+               // Remove all related files
+               fileUtils.deleteQuietly(new File(dirPath));
+               // Remove Document
+               mediaDoc.delete();
+               rep = true;
+            }
+            catch(IOException ioe){
+            }
+         }
+      }
+      return rep;
+   }
+   
+   /**
+   * Get media URL from Path
+   *
+   * @param path the media path
+   * @return the media url
+   */
+   def getMediaURL(path){
+      File[] medias = new File[1];
+      medias[0] = new File(path);
+      def URLs = this.fileUtils.toURLs(medias);
+      return (medias &amp;&amp; medias.length &gt; 0) ? medias[0]: "";
+   } 
+
+   /**
+   * Get video information
+   * 
+   * @param videoPath the file of the video
+   * @return the video information
+   */
+   def getVideoInfo(videoPath){
+      def rep = [:];
+      if(this.checkFileExists(videoPath)){
+         rep["path"] = videoPath;
+         rep["dirPath"] = '/' + this.fileNameUtils.getPath(rep["path"]);
+         rep["name"] = this.fileNameUtils.getName(rep["path"]);
+         rep["extension"]  = this.fileNameUtils.getExtension(rep["name"]);
+         File videoFile = new File(videoPath);
+         rep["size"] = this.fileUtils.sizeOf(videoFile);
+         rep["sizeMB"] = rep["size"]/(1000*1000);
+         MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
+         rep["mimeType"] = mimeTypesMap.getContentType(videoFile);
+         // Get the video resolution and duration
+         rep["resolution"] = this.mediaTranscoder.getVideoResolution(videoPath,'s');
+         rep["arrayResolution"] = this.mediaTranscoder.getVideoResolution(videoPath);
+         rep["duration"] = this.mediaTranscoder.getVideoDuration(videoPath, 's');
+         rep["hmsDuration"] = this.mediaTranscoder.getVideoDuration(videoPath, 'hms');
+      }
+      return rep;
+   }
+}</content>
+</xwikidoc>

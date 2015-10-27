@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc>
+  <web>XWikiTubeCode</web>
+  <name>WebHome</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>WebHome</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1445425098000</creationDate>
+  <date>1445855014000</date>
+  <contentUpdateDate>1445853436000</contentUpdateDate>
+  <version>1.1</version>
+  <title>XWikiTube home</title>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>false</hidden>
+  <object>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>XWikiTubeCode.WebHome</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>e832444d-61d9-4ab4-9a47-0fb3ec7f647e</guid>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>var actionsURL = "$xwiki.getURL('XWikiTubeCode.VideoUpload','view','xpage=plain')";
+
+// Refresh live table
+function refreshLiveTable(selector){
+   var liveTable = window["livetable_" + selector];
+   liveTable.clearCache();
+   liveTable.showRows(Math.max(liveTable.lastOffset, 1), liveTable.limit);
+}
+
+require(['jquery'], function($){
+   // Initialize media delete btns
+   $( "body" ).on( "click", ".delete-media", function() {
+      $('.xdialog-modal-container').remove();
+      var mediaDocRef = $(this).attr("rel");
+      new XWiki.widgets.ConfirmationBox({onYes: function() {
+         new XWiki.widgets.Notification("Deleting ...",'inprogress');
+         $.ajax({
+	    url: actionsURL + "&amp;action=deleteMedia" + "&amp;mediaDocRef=" + encodeURIComponent(mediaDocRef),
+            type: 'POST'
+         }).done(function(rep){
+             $(".xnotification-inprogress").remove();
+             if(rep){
+                new XWiki.widgets.Notification("$services.localization.render('Delete done!')","done");
+             }
+             else
+             {
+                new XWiki.widgets.Notification("$services.localization.render('error when trying to delete the video!')", "error");
+             }
+             refreshLiveTable("medias");
+         });
+      }}, {confirmationText:"Are you sure to delete the video ?"});   
+   });
+});</code>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse>1</parse>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>XWikiTubeCode.WebHome</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>4bb1c9b7-8d01-4e95-9a45-1c3adb207265</guid>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>.actionsrow a {
+    text-decoration: none !important;
+    padding: 2px;
+}</code>
+    </property>
+    <property>
+      <contentType>CSS</contentType>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse/>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <content>{{velocity}}
+#**
+* This page is used to list all added videos 
+*#
+
+## Globals
+#set($discard = $xwiki.ssx.use("XWikiTubeCode.WebHome"))
+#set($discard = $xwiki.jsx.use("XWikiTubeCode.WebHome"))
+#set($videoUploader = $xwiki.parseGroovyFromPage("XWikiTubeCode.VideoUploadGroovy"))
+#set($discard = $videoUploader.init($xwiki, $xcontext, $services))
+## Check FFmpeg installation
+#set($ffmpeg = $videoUploader.mediaTranscoder.checkFFmpeg())
+#set($liveTableSourceURL = $xwiki.getURL('XWikiTubeCode.VideoUpload','view','xpage=plain&amp;outputSyntax=plain&amp;action=getXWikiTubeVideos'))
+#set($columns = ["name", "extension", "mimeType", "size", "duration", "resolution", "creator", "creationDate", "encoded", "actions"])
+#set($columnsProperties = {
+    "name" : { "type" : "text", "sortable":false, "filterable":true},
+    "extension" : { "type" : "text", "sortable":false, "filterable":false},
+    "mimeType" : { "type" : "text", "sortable":false, "filterable":false},
+    "size" : { "type" : "text", "sortable":false, "filterable":false},
+    "duration" : { "type" : "text", "sortable":false, "filterable":false},
+    "resolution" : { "type" : "text", "sortable":false, "filterable":false},
+    "creator" : { "type" : "text", "sortable":false, "filterable":false},
+    "creationDate" : { "type" : "text", "sortable":false, "filterable":false},
+    "encoded" : { "type" : "text", "sortable":false, "filterable":false},
+    "actions" : {"type" : "none", "link" : "none", "html" : "true", "sortable":false}
+})
+#set($options = { 
+   "url":"$liveTableSourceURL",
+   "rowCount": 10
+})
+#if(!$ffmpeg)
+ {{warning}}FFmpeg library is not installed on your server. FFmpeg is required to encode videos.{{/warning}}
+#end
+
+#livetable("medias" $columns $columnsProperties $options)
+{{/velocity}}</content>
+</xwikidoc>
