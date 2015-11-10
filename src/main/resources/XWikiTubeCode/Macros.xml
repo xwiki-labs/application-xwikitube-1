@@ -58,6 +58,7 @@
       * Size: **$!video.sizeMB MB**
       * Duration(HOURS:MM:SS.MICROSECONDS): **$!video.hmsDuration**
       * Resolution(px): **$!video.resolution**
+      * Bitrate(kbps): **$!video.bitrate**
    #end
 #end
 {{/velocity}}</content>

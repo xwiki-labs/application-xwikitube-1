@@ -123,7 +123,8 @@
     <property>
       <code>// Configure require.js to use Bootstrap FileStyle (https://github.com/markusslima/bootstrap-filestyle)
 require.config({
-   "paths": { "bootstrap-filestyle": "$services.webjars.url('bootstrap-filestyle/1.2.1/src/bootstrap-filestyle.min.js')" }
+   //"paths": { "bootstrap-filestyle": "$services.webjars.url('bootstrap-filestyle/1.2.1/src/bootstrap-filestyle.min.js')" }
+   "paths": { "bootstrap-filestyle": "$xwiki.getDocument('XWikiTubeCode.bootstrap-filestyle').getAttachmentURL('bootstrap-filestyle.min', 'download')" }
 });
 
 var targetInput = $('videoInput');
@@ -423,7 +424,6 @@ $("input.encode-video-chk").click(function(){
 #set($discard = $videoUploader.init($xwiki, $xcontext, $services))
 ## Check FFmpeg installation
 #set($ffmpeg = $videoUploader.mediaTranscoder.checkFFmpeg())
-
 {{html}}
 &lt;form action="$actionURL"&gt;
 &lt;div class="video-uploader-container"&gt;
@@ -484,19 +484,10 @@ For each uploaded video an entry will be added in the XWikiTube application home
          #set($ffmpeg = $videoUploader.mediaTranscoder.checkFFmpeg())
          #if ("$!request.encodeVideo" != '' &amp;&amp; $request.encodeVideo == "true" &amp;&amp; $ffmpeg)
               #set($video = $rep.video)
-              #*
-              [{"description" : "720p", "type": "standard frame bitrate", "bitrate": "5000k", "frameRate": ["24", "25", "30"], "resolution": "1280x720"},
-              {"description" : "480p", "type": "standard frame bitrate", "bitrate": "2500k", "frameRate": ["24", "25", "30"], "resolution": "854x480"},
-              {"description" : "360p", "type": "standard frame bitrate", "bitrate": "1000k", "frameRate": ["24", "25", "30"], "resolution": "640x360"},
-              {"description" : "360p", "type": "high frame bitrate", "bitrate": "1500k", "frameRate": ["48", "50", "60"], "resolution": "640x360"},
-              {"description" : "240p", "type": "standard frame bitrate", "bitrate": ["300k", "700k"], "frameRate": ["24", "25", "30"], "resolution": "426x240"}]
-              *#
-              #set($settings = [
-              {"description" : "360p", "type": "high frame bitrate", "bitrate": "1500k", "frameRate": ["48", "50", "60"], "resolution": "640x360"}
-              ])
-              ##$videoUploader.mediaTranscoder.encodeVideo($video.path, $video.dirPath, "libvpx-vp9", $settings)
-              #if("$!video.videoDocRef" != '' &amp;&amp; $xwiki.exists($video.videoDocRef))
-                 #set($videoDoc = $xwiki.getDocument($video.videoDocRef))
+              #set($videoDocRef = $video.videoDocRef)
+              #if("$!videoDocRef" != '' &amp;&amp; $xwiki.exists($videoDocRef))
+                 #set($discard = $videoUploader.encodeVideo($videoDocRef, "libvpx-vp9"))
+                 #set($videoDoc = $xwiki.getDocument($videoDocRef))
                  #set($videoObj = $videoDoc.getObject("XWikiTubeCode.MediaClass"))
                  #if("$!videoObj" != '')
                     #set($discard = $videoObj.set("encoded", 1))
@@ -511,12 +502,12 @@ For each uploaded video an entry will be added in the XWikiTube application home
       #end
    #elseif($action == 'getXWikiTubeVideos')
       ## List all XWiki videos filtred by user
-      #set($offset = $util.parseInt($request.get('offset')))
+      #set($offset = $mathtool.toInteger($request.get('offset')))
       #set($offset = $offset - 1)
       #if($offset &lt; 0)
         #set($offset = 0)
       #end
-      #set($limit = $util.parseInt($request.get('limit')))
+      #set($limit = $mathtool.toInteger($request.get('limit')))
       #if(!$hasAdmin)
          #set($userFilter = " and doc.author=${xcontext.user}")
       #end
@@ -524,7 +515,7 @@ For each uploaded video an entry will be added in the XWikiTube application home
       #if("$!filterName" != '')
          #set($filterNameCond = " and media.name like :filterName")
       #end
-      #set($xwql = "from doc.object(XWikiTubeCode.MediaClass) as media where 1=1 $!userFilter $!filterNameCond order by doc.creationDate")
+      #set($xwql = "from doc.object(XWikiTubeCode.MediaClass) as media where doc.fullName&lt;&gt;'XWikiTubeCode.MediaTemplate' and media.original=1 $!userFilter $!filterNameCond order by doc.creationDate")
       #set($query = $services.query.xwql($xwql))
       #if("$!filterName" != '')
          #set($query = $query.bindValue("filterName","%$filterName%"))   
@@ -543,7 +534,7 @@ For each uploaded video an entry will be added in the XWikiTube application home
          #set($name = $mediaObj.getValue("name"))
          #set($extension = $mediaObj.getValue("extension"))
          #set($mimeType = $mediaObj.getValue("mimeType"))
-         #set($size = $mediaObj.getValue("size"))
+         #set($size = $mathtool.div($mediaObj.getValue("size"), 1000000))
          #set($duration = $mediaObj.getValue("duration"))
          #set($resolution = $mediaObj.getValue("resolution"))
          #set($creator = $xwiki.getUserName($mediaDoc.author, false))
@@ -560,7 +551,7 @@ For each uploaded video an entry will be added in the XWikiTube application home
             #set($actionLinks = "${actionLinks}&lt;a href='javascript:;' rel='${mediaDocRef}' class='glyphicon glyphicon-trash delete-media' title='Delete'&gt;&lt;/a&gt;")
          #end
          #set($actionLinks = "${actionLinks}&lt;/div&gt;") 
-         #set($row = {"doc_viewable": true, "name": $name, "extension": $extension, "mimeType": $mimeType, "size": $size, "duration": $duration, "resolution": $resolution, "creator": "$creator", "creationDate": $creationDate, "encoded": $encoded, "actions": $actionLinks})
+         #set($row = {"doc_viewable": true, "name": $name, "extension": $extension, "mimeType": $mimeType, "size": "${size} MB", "duration": "${duration} s", "resolution": $resolution, "creator": "$creator", "creationDate": $creationDate, "encoded": $encoded, "actions": $actionLinks})
          #set($discard = $rows.add($row))
       #end
       {
@@ -569,7 +560,7 @@ For each uploaded video an entry will be added in the XWikiTube application home
       "tags" : [],
       "returnedrows": $returnedRows,
       "offset": ($offset + 1),
-      "reqNo": $util.parseInt($request.reqNo),
+      "reqNo": $mathtool.toInteger($request.reqNo),
       "rows": $jsontool.serialize($rows)
       }
    #elseif($action == 'deleteMedia')

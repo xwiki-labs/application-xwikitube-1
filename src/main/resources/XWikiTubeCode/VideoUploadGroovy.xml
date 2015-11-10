@@ -48,9 +48,10 @@
 
 import java.io.File;
 import java.io.FileOutputStream;
-import org.apache.commons.io.FilenameUtils
-import org.apache.commons.io.FileUtils
-import javax.activation.MimetypesFileTypeMap
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.FileUtils;
+import javax.activation.MimetypesFileTypeMap;
+import org.xwiki.environment.Environment;
 
 class VideoUploadClass
 {
@@ -62,7 +63,7 @@ class VideoUploadClass
    def mediaTranscoder;
    def commandRunner;
    def mediaClass = "XWikiTubeCode.MediaClass";
-   def xwikiTubeDir = '/home/user/Bureau/MohamedDocs/apache-tomcat-8.0.21/webapps/mainwiki/xwikitube';
+   def xwikiTubeTmpDir;
    def userXWikiTubeDir;
    FilenameUtils fileNameUtils;
    FileUtils FileUtils;
@@ -81,6 +82,15 @@ class VideoUploadClass
       this.fileNameUtils = new FilenameUtils();
       this.fileUtils = new FileUtils();
       // Check if there is an XWikiTube directory in the file system for the current user, if not create it
+      Object env = services.component.getInstance(Environment.class);
+      File tmpDir = env.getTemporaryDirectory();
+      //this.xwikiTubeTmpDir = this.fileNameUtils.concat(tmpDir.getPath(), "xwikitube");
+      this.xwikiTubeTmpDir = tmpDir.getPath();
+      if(!this.checkDirExists(this.xwikiTubeTmpDir)){
+         // Add the xwikitube directory to the temp directory
+         File dir = new File(this.xwikiTubeTmpDir, "xwikitube");
+         if (!dir.mkdir()) { throw new RuntimeException("failed to make directory: " + this.xwikiTubeTmpDir); }
+      }
       this.userXWikiTubeDir = this.getUserXWikiTubeDir();
    }
    
@@ -122,16 +132,16 @@ class VideoUploadClass
    */
    def getUserXWikiTubeDir(user = xcontext.getUser()){
       String userXWikiTubeDir = "";
-      def xwikiTubeDir = this.xwikiTubeDir;
+      def xwikiTubeDir = this.xwikiTubeTmpDir;
       if(!this.checkDirExists(xwikiTubeDir)){
          File dir = new File(xwikiTubeDir);
          if (!dir.mkdir()) { throw new RuntimeException("failed to make directory"); }
       }
       // Check if the XWikitube user directory exists
       if(xwiki.exists(user)){
-         userXWikiTubeDir = this.xwikiTubeDir + '/' + user;
+         userXWikiTubeDir = this.xwikiTubeTmpDir + '/' + user;
          if(!this.checkDirExists(userXWikiTubeDir)){
-            File userDir = new File(this.xwikiTubeDir, user);
+            File userDir = new File(this.xwikiTubeTmpDir, user);
             if (!userDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
          }
       }
@@ -154,6 +164,20 @@ class VideoUploadClass
    }
 
    /**
+   * create a file from InputStream
+   * 
+   * @param fileDir the directory containing the file
+   * @param fileName the name of the file
+   * @param inputStream the inputStream of the file
+   * @return a boolean that indicates if the file wa created or not.
+   */
+   boolean createFileFromInputStream(String fileDir, String fileName, InputStream inputStream){
+      File file = new File(fileDir, fileName);
+      this.fileUtils.copyInputStreamToFile(inputStream, file);
+      return this.checkFileExists(fileDir, fileName);
+   }
+
+   /**
    * Upload a video
    * 
    * @param formFieldName the file input name
@@ -162,20 +186,22 @@ class VideoUploadClass
    */
    def uploadVideo(formFieldName, encodeVideo = false){
       def rep = ["ret": false, "error": ""];
-      def fileItemNames = this.fileUploader.getFileItemNames();
-      for(item in fileItemNames){
-        if(item == formFieldName){
-            def fileName = this.fileUploader.getFileName(item);
-            def byteCode = this.fileUploader.getFileItemData(item);
+      def fileItems = this.fileUploader.getFileItems();
+      for(item in fileItems){
+        if(item.getFieldName() == formFieldName){
+            def fileName = item.getName();
+            InputStream inputStream = item.getInputStream();
             if(!this.checkFileExists(userXWikiTubeDir, fileName)){
                // Create the file
                File videoDir = new File(userXWikiTubeDir, fileName);
                if (!videoDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
-               rep["ret"] = this.createFileFromByteCode(videoDir.getPath(), fileName, byteCode);
+               rep["ret"] = this.createFileFromInputStream(videoDir.getPath(), fileName, inputStream);
                def filePath = this.fileNameUtils.concat(videoDir.getPath(), fileName);
                rep["video"] = this.getVideoInfo(filePath);
+               rep["video"]["original"] = 1;
                // Create an XWikiTube entry for the uploaded video
                rep["video"]["videoDocRef"] = this.createVideoEntry(rep["video"]);
+               this.attachFileToDoc(rep["video"]["videoDocRef"],  rep["video"]["name"], filePath);
             }
             else
             {
@@ -186,34 +212,110 @@ class VideoUploadClass
       }
       return rep;
    }
+   
+   /**
+   * Attach file to doc
+   *
+   * @param docRef target document reference
+   * @param path file path to attach
+   */
+   def attachFileToDoc(docRef, fileName, path){
+      if(docRef != "" &amp;&amp; xwiki.exists(docRef)){
+         def vdoc = xwiki.getDocument(docRef);
+         if(this.checkFileExists(path)){
+            File file = new File(path);
+            InputStream targetStream = new FileInputStream(file);
+            vdoc.addAttachment(fileName, targetStream);
+            vdoc.save();
+         }
+      }
+   }
 
    /**
    * Create video object
    * @param videoInfo the video information
    * @return the video document reference
    */
-   def createVideoEntry(videoInfo){
+   def createVideoEntry(videoInfo, videoDocRef = ""){
       def rep = "";
       if(videoInfo){
-         def space = "XWikiTube" + userName;
-         def docName = xwiki.getUniquePageName(space, this.fileNameUtils.getBaseName(videoInfo["name"]));
-         def docRef = space + "." + docName;
-         def videoDoc = xwiki.getDocument(docRef);
-         videoDoc.removeObjects(mediaClass);
+         def videoDoc;
+         if(videoDocRef == ""){
+            def space = "XWikiTube" + userName;
+            def docName = xwiki.getUniquePageName(space, this.fileNameUtils.getBaseName(videoInfo["name"]));
+            videoDocRef = space + "." + docName;
+            videoDoc = xwiki.getDocument(videoDocRef);
+         }
+         else
+         {
+            if(xwiki.exists(videoDocRef)){
+               videoDoc = xwiki.getDocument(videoDocRef);
+            }
+         }
          // Attache the video object
-         def videoID = videoDoc.createNewObject(mediaClass);
-         def videoObj = videoDoc.getObject(mediaClass, videoID);
-         videoObj.set("name", videoInfo.name);
-         videoObj.set("dirPath", videoInfo.dirPath);
-         videoObj.set("extension", videoInfo.extension);
-         videoObj.set("mimeType", videoInfo.mimeType);
-         videoObj.set("resolution", videoInfo.resolution);
-         //videoObj.set("size", videoInfo.size);
-         //videoObj.set("duration", videoInfo.duration);
-         videoDoc.save();
-         rep = docRef;
+         if(videoDoc){
+            def videoID = videoDoc.createNewObject(mediaClass);
+            def videoObj = videoDoc.getObject(mediaClass, videoID);
+            videoObj.set("name", videoInfo.name);
+            videoObj.set("dirPath", videoInfo.dirPath);
+            videoObj.set("extension", videoInfo.extension);
+            videoObj.set("mimeType", videoInfo.mimeType);
+            videoObj.set("resolution", videoInfo.resolution);
+            videoObj.set("size", videoInfo.size);
+            videoObj.set("duration", videoInfo.duration);
+            videoObj.set("bitrate", videoInfo.bitrate);
+            videoObj.set("original", videoInfo.original);
+            videoDoc.save();
+            rep = videoDocRef;
+         }
       }
       return rep;
+   }
+   
+   /**
+   * Encode media
+   * @param videoDocRef the video document reference of the source video
+   * @param videoCodec the video codec will be used to encode the video
+   * @param settings encoding settings
+   */
+   def encodeVideo(videoDocRef, videoCodec, settings = null){
+      if(videoDocRef != "" &amp;&amp; xwiki.exists(videoDocRef)){
+         def videoDoc = xwiki.getDocument(videoDocRef);
+         def sourceVideoObject = videoDoc.getObject("XWikiTubeCode.MediaClass", "original", "1");
+         if(sourceVideoObject){
+            def videoName = sourceVideoObject.getValue("name");
+            def dirPath = sourceVideoObject.getValue("dirPath");
+            def path = this.fileNameUtils.concat(dirPath, videoName);
+            this.mediaTranscoder.encodeVideo(path, dirPath, videoCodec, settings);
+            // Attach generated videos to the document document
+            def files = this.getDirectoryFiles(dirPath);
+            for(file in files){
+               if(file.getName() != videoName){
+                  def video = this.getVideoInfo(file.getPath());
+                  // Attach MediaClass object on to video document that describe the video
+                  this.attachFileToDoc(videoDocRef, file.getName(), file.getPath());
+                  if(!file.getName().contains("audio")){
+                     this.createVideoEntry(video, videoDocRef);
+                  }
+               }
+            }
+         }
+      }
+    }
+
+   /**
+   * Get directory files
+   * @param dirPath directory path
+   * @return List of File objects
+   */
+   def getDirectoryFiles(dirPath){
+      if(this.checkDirExists(dirPath)){
+         return this.fileUtils.listFiles(new File(dirPath), null, true);
+      }
+      else
+      {
+       return [];
+      }
    }
 
    /**
@@ -232,7 +334,12 @@ class VideoUploadClass
                // Remove all related files
                fileUtils.deleteQuietly(new File(dirPath));
                // Remove Document
-               mediaDoc.delete();
+               def targetDoc = mediaDoc.getDocument();
+               def attachmentStore = xwiki.getXWiki().getAttachmentStore();
+               for (attachment in targetDoc.getAttachmentList()){
+                  attachmentStore.deleteXWikiAttachment(attachment, false, xcontext.context, true);
+               }
+               xwiki.getXWiki().deleteDocument(targetDoc, false, xcontext.context);
                rep = true;
             }
             catch(IOException ioe){
@@ -278,6 +385,42 @@ class VideoUploadClass
          rep["arrayResolution"] = this.mediaTranscoder.getVideoResolution(videoPath);
          rep["duration"] = this.mediaTranscoder.getVideoDuration(videoPath, 's');
          rep["hmsDuration"] = this.mediaTranscoder.getVideoDuration(videoPath, 'hms');
+         rep["bitrate"] = this.mediaTranscoder.getVideoBitrate(videoPath);
+      }
+      return rep;
+   }
+
+   /**
+   * Delete directory
+   * 
+   * @param dirPath Directory path
+   */
+   def deleteDir(dirPath){
+      def rep = false;
+      if(this.checkDirExists(dirPath)){
+         try{
+            this.fileUtils.deleteQuietly(new File(dirPath));
+            rep = true;
+         }
+         catch(IOException ioe){
+         }
+      }
+      return rep;
+   }
+
+   /**
+   * Clear temp directory
+   * 
+   */
+   def clearTmpDir(){
+      def rep = false;
+      if(this.checkDirExists(this.xwikiTubeTmpDir)){
+         try{
+            this.fileUtils.deleteQuietly(new File(this.xwikiTubeTmpDir));
+            rep = true;
+         }
+         catch(IOException ioe){
+         }
       }
       return rep;
    }

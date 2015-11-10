@@ -51,6 +51,19 @@
       <defaultWeb/>
       <nameField/>
       <validationScript/>
+      <bitrate>
+        <customDisplay/>
+        <disabled>0</disabled>
+        <name>bitrate</name>
+        <number>10</number>
+        <numberType>integer</numberType>
+        <prettyName>Bitrate</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.NumberClass</classType>
+      </bitrate>
       <dirPath>
         <customDisplay/>
         <disabled>0</disabled>
@@ -130,6 +143,20 @@
         <validationRegExp/>
         <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
       </name>
+      <original>
+        <customDisplay/>
+        <defaultValue>0</defaultValue>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType/>
+        <name>original</name>
+        <number>9</number>
+        <prettyName>original</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <validationMessage/>
+        <validationRegExp/>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </original>
       <resolution>
         <customDisplay/>
         <disabled>0</disabled>
@@ -181,9 +208,6 @@
     </property>
     <property>
       <resolution/>
-    </property>
-    <property>
-      <size/>
     </property>
   </object>
   <content/>

@@ -44,18 +44,44 @@
   <content>{{velocity}}
 ## You can modify this page to customize the presentation of your object.
 ## At first you should keep the default presentation and just save the document.
-#if($context.action == "view")
-#set($class = $doc.getObject('XWikiTubeCode.MediaClass').xWikiClass)
-#foreach($prop in $class.properties)
-  ; $prop.prettyName
-  : $doc.display($prop.getName())
-#end
-
+#if($xcontext.action == "view")
 #set($videoUploader = $xwiki.parseGroovyFromPage("XWikiTubeCode.VideoUploadGroovy"))
 #set($discard = $videoUploader.init($xwiki, $xcontext, $services))
-#set($mediaObj = $doc.getObject("XWikiTubeCode.MediaClass"))
-#set($mediaPath = $videoUploader.fileNameUtils.concat($mediaObj.getValue("dirPath"), $mediaObj.getValue("name")))
-##set($mediaURL = $videoUploader.getMediaURL($mediaPath))
+#set($originalMediaObj = $doc.getObject("XWikiTubeCode.MediaClass", "original", 1))
+#if($originalMediaObj)
+=== Original video : $!originalMediaObj.getValue("name") ===
+**Extension:** $!originalMediaObj.getValue("extension")
+**MimeType:** $!originalMediaObj.getValue("mimeType")
+**Size:** $!mathtool.div($originalMediaObj.getValue("size"), 1000000) MB
+**Resolution:** $!originalMediaObj.getValue("resolution")
+**Duration:** $!originalMediaObj.getValue("duration") seconds
+**Bitrate:** $!originalMediaObj.getValue("bitrate") kbps
+#end
+#set($mediaObjects = $doc.getObjects("XWikiTubeCode.MediaClass"))
+#if($mediaObjects.size() &gt; 1)
+=== Encoded videos ===
+#foreach($v in $mediaObjects)
+#if($v.getValue("original") != 1)
+**Extension:** $!v.getValue("extension")
+**MimeType:** $!v.getValue("mimeType")
+**Size:** $!mathtool.div($v.getValue("size"), 1000000) MB
+**Resolution:** $!v.getValue("resolution")
+**Duration:** $!v.getValue("duration") seconds
+**Bitrate:** $!v.getValue("bitrate") kbps
+#set($videoName = $!v.getValue("name"))
+#if($doc.getAttachment($videoName))
+
+{{video attachment="$videoName" width="320px" height="180px"/}}
+#end
+
+#end
+#end
+
+#if($doc.getAttachment("audio_128k.webm"))
+== Audio ==
+{{video attachment="audio_128k.webm" width="320px" height="180px"/}}
+#end
+#end
 #end
 {{/velocity}}</content>
 </xwikidoc>
