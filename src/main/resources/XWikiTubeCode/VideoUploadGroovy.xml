@@ -295,7 +295,7 @@ class VideoUploadClass
                   def video = this.getVideoInfo(file.getPath());
                   // Attach MediaClass object on to video document that describe the video
                   this.attachFileToDoc(videoDocRef, file.getName(), file.getPath());
-                  if(!file.getName().contains("audio")){
+                  if(!file.getName().contains("audio") &amp;&amp; !file.getName().contains("manifest")){
                      this.createVideoEntry(video, videoDocRef);
                   }
                }
