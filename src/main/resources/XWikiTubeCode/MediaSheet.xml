@@ -72,7 +72,7 @@
 #set($videoName = $!v.getValue("name"))
 #if($doc.getAttachment($videoName))
 
-{{video attachment="$videoName" width="320px" height="180px"/}}
+{{video attachment="$videoName" width="320" height="180"/}}
 #end
 
 #end
@@ -80,7 +80,7 @@
 
 #if($doc.getAttachment("audio_128k.webm"))
 == Audio ==
-{{video attachment="audio_128k.webm" width="320px" height="180px"/}}
+{{video attachment="audio_128k.webm" width="320" height="180"/}}
 #end
 #end
 #end
