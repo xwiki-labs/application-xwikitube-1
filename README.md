@@ -8,6 +8,8 @@
 
 * bootstrap-filestyle : https://github.com/markusslima/bootstrap-filestyle (Download the webjar from http://search.maven.org/)
 
+* XWiki video macro : https://github.com/xwiki-contrib/macro-video
+
 ## Usage
 
 To upload and encode a video using xwikitube use the uploadvideo macro
