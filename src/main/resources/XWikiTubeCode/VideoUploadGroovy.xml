@@ -78,7 +78,7 @@ class VideoUploadClass
       this.userName = xwiki.getDocument(xcontext.getUser()).getName();
       this.fileUploader = xwiki.fileupload;
       this.commandRunner = services.commandRunner;
-      this.mediaTranscoder = xwiki.parseGroovyFromPage("MediaTranscoderCode.MediaTranscoderGroovy")
+      this.mediaTranscoder = xwiki.parseGroovyFromPage("XWikiTubeCode.MediaTranscoderGroovy")
       this.mediaTranscoder.init(xwiki, xcontext, services);
       this.fileNameUtils = new FilenameUtils();
       this.fileUtils = new FileUtils();
