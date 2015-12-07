@@ -124,8 +124,7 @@
     <property>
       <code>// Configure require.js to use Bootstrap FileStyle (https://github.com/markusslima/bootstrap-filestyle)
 require.config({
-   //"paths": { "bootstrap-filestyle": "$services.webjars.url('bootstrap-filestyle/1.2.1/src/bootstrap-filestyle.min.js')" }
-   "paths": { "bootstrap-filestyle": "$xwiki.getDocument('XWikiTubeCode.bootstrap-filestyle').getAttachmentURL('bootstrap-filestyle.min', 'download')" }
+   "paths": { "bootstrap-filestyle": "$services.webjars.url('bootstrap-filestyle/1.2.1/src/bootstrap-filestyle.min.js')" }
 });
 
 var targetInput = $('videoInput');
@@ -154,6 +153,20 @@ $("input.encode-video-chk").click(function(){
       fileUploader.options.targetURL = formAction;
       fileUploader.formData.action = formAction;
    }
+});
+
+$(function(){
+  if($("#videoTargetDoc").size() &gt; 0){
+    var targetDocRef = $("#videoTargetDoc").val();
+    var form = $("#videoTargetDoc").closest("form");
+    if(form.size() &gt; 0){
+       var formAction = form.attr("action");
+       formAction = formAction + "&amp;targetDocRef=" + encodeURIComponent(targetDocRef);
+       form.attr("action", formAction);
+       fileUploader.options.targetURL = formAction;
+       fileUploader.formData.action = formAction;
+    }
+  }
 });
 });</code>
     </property>
@@ -429,8 +442,11 @@ $("input.encode-video-chk").click(function(){
 &lt;form action="$actionURL"&gt;
 &lt;div class="video-uploader-container"&gt;
    &lt;input type="file" id="videoInput" name="videoInput" class="upload-video-input"/&gt;
+   #if ("$!xcontext.macro.params.targetDoc" != '' &amp;&amp; $xwiki.exists($xcontext.macro.params.targetDoc))
+      &lt;input type="hidden" id="videoTargetDoc" value="$xcontext.macro.params.targetDoc"/&gt;
+   #end
    &lt;span class="encode-vid-txt"&gt;
-      Encode the video after uploading &lt;input type="checkbox" value="1" name="encodeVideo" class="encode-video-chk"/&gt;
+      ##Encode the video after uploading &lt;input type="checkbox" value="1" name="encodeVideo" class="encode-video-chk"/&gt;
       #if(!$ffmpeg)
       &lt;span class="errormsg"&gt;(FFmpeg library is not installed on your server. FFmpeg is required to encode videos.)&lt;/span&gt;
       #end
@@ -467,6 +483,73 @@ For each uploaded video an entry will be added in the XWikiTube application home
       <visibility>Current Wiki</visibility>
     </property>
   </object>
+  <object>
+    <class>
+      <name>XWiki.WikiMacroParameterClass</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <defaultValue>
+        <disabled>0</disabled>
+        <name>defaultValue</name>
+        <number>4</number>
+        <prettyName>Parameter default value</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </defaultValue>
+      <description>
+        <disabled>0</disabled>
+        <name>description</name>
+        <number>2</number>
+        <prettyName>Parameter description</prettyName>
+        <rows>5</rows>
+        <size>40</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </description>
+      <mandatory>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>mandatory</name>
+        <number>3</number>
+        <prettyName>Parameter mandatory</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </mandatory>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Parameter name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+    </class>
+    <name>XWikiTubeCode.VideoUpload</name>
+    <number>0</number>
+    <className>XWiki.WikiMacroParameterClass</className>
+    <guid>65e168f2-e343-427c-997f-9c727da8bc1e</guid>
+    <property>
+      <defaultValue/>
+    </property>
+    <property>
+      <description>The document reference of target xwiki document in which the videos will be attached.
+If this parameter is not mentioned when a document is created for each video.</description>
+    </property>
+    <property>
+      <mandatory>0</mandatory>
+    </property>
+    <property>
+      <name>targetDoc</name>
+    </property>
+  </object>
   <content>{{include reference="XWikiTubeCode.Macros"/}}
 
 {{velocity}}
@@ -477,19 +560,24 @@ For each uploaded video an entry will be added in the XWikiTube application home
 
 #if ("$!action" != '')
    #if ($action == "uploadVideo")
-      #set($rep = $videoUploader.uploadVideo("videoInput"))
+      ## Check the video target document
+      #set($targetDocRef = "")
+      #if ("$!request.targetDocRef" != '' &amp;&amp; $xwiki.exists($request.targetDocRef))
+         #set($targetDocRef = $request.targetDocRef)   
+      #end
+      #set($rep = $videoUploader.uploadVideo("videoInput", $targetDocRef))
       #if ($rep.ret == true)
          ## Display video information
          #displayVideoInfo($rep.video)
          ## Encode the video
          #set($ffmpeg = $videoUploader.mediaTranscoder.checkFFmpeg())
-         #if ("$!request.encodeVideo" != '' &amp;&amp; $request.encodeVideo == "true" &amp;&amp; $ffmpeg)
+         #if ($ffmpeg)
               #set($video = $rep.video)
               #set($videoDocRef = $video.videoDocRef)
               #if("$!videoDocRef" != '' &amp;&amp; $xwiki.exists($videoDocRef))
                  #set($discard = $videoUploader.encodeVideo($videoDocRef, "libvpx-vp9"))
                  #set($videoDoc = $xwiki.getDocument($videoDocRef))
-                 #set($videoObj = $videoDoc.getObject("XWikiTubeCode.MediaClass"))
+                 #set($videoObj = $videoDoc.getObject("XWikiTubeCode.MediaClass", "original", 1))
                  #if("$!videoObj" != '')
                     #set($discard = $videoObj.set("encoded", 1))
                     #set($discard = $videoDoc.save())

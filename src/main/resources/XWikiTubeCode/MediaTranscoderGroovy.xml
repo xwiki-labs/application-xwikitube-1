@@ -21,14 +21,14 @@
 -->
 
 <xwikidoc version="1.1">
-  <web>MediaTranscoderCode</web>
+  <web>XWikiTubeCode</web>
   <name>MediaTranscoderGroovy</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
   <creator>xwiki:XWiki.Admin</creator>
   <creationDate>1441868628000</creationDate>
-  <parent>MediaTranscoderCode.WebHome</parent>
+  <parent>XWikiTubeCode.WebHome</parent>
   <author>xwiki:XWiki.Admin</author>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <date>1441869423000</date>
@@ -461,6 +461,34 @@ class MediaTranscodeClass
       {
          return "Streams directory not found!";
       }
+   }
+   
+   /**
+   * Format a video duration
+   * 
+   * @param duration in seconds
+   * @return String
+   */
+   def formatDuration(duration) {
+      def seconds = Math.floor(duration).toInteger();
+      def rep = "";
+      if(seconds % 3600 == 0){
+         rep = (seconds/3600).toString() + ":00:00";
+      }
+      else
+      {
+         def hours = Math.floor(seconds/3600).toInteger();
+         if((seconds - hours*3600)%60 == 0){
+            rep = hours.toString() + ":" + ((seconds - hours*3600)/60).toString() + ":00"; 
+         }
+         else
+         {
+            def minutes = Math.floor((seconds - hours*3600)/60).toInteger();
+            def s = seconds - (hours*3600 + minutes*60);
+            rep = hours.toString() + ":" + minutes + ":" + s;
+         }
+      }
+      return rep;
    }
 }</content>
 </xwikidoc>

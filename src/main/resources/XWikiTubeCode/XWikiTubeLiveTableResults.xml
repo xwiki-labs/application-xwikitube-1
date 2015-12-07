@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!--
  * See the NOTICE file distributed with this work for additional
  * information regarding copyright ownership.
@@ -22,18 +21,18 @@
 
 <xwikidoc>
   <web>XWikiTubeCode</web>
-  <name>Macros</name>
+  <name>XWikiTubeLiveTableResults</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
-  <parent>XWikiTubeCode.WebHome</parent>
+  <parent>WebHome</parent>
   <creator>xwiki:XWiki.Admin</creator>
   <author>xwiki:XWiki.Admin</author>
   <customClass/>
   <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
-  <creationDate>1445335242000</creationDate>
-  <date>1445440754000</date>
-  <contentUpdateDate>1445440754000</contentUpdateDate>
+  <creationDate>1449221407000</creationDate>
+  <date>1449221407000</date>
+  <contentUpdateDate>1449221407000</contentUpdateDate>
   <version>1.1</version>
   <title/>
   <defaultTemplate/>
@@ -41,25 +40,10 @@
   <comment/>
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
-  <hidden>false</hidden>
-  <content>{{velocity}}
-#* General XWikiTube utilities. *#
+  <hidden>true</hidden>
+  <content>{{velocity output="false"}}
+$services.localization.use('document', 'XWikiTubeCode.XWikiTubeTranslations')
+{{/velocity}}
 
-#**
-* Display video information
-* @param $video a map containing the video information
-*#
-#macro(displayVideoInfo $video)
-   #if ("$!video" != '' &amp;&amp; $video.size() &gt; 0)
-      ==== Video information ====
-      * Name: **$!video.name**
-      * Extension: **$!video.extension**
-      * Mime type: **$!video.mimeType**
-      * Size: **$!video.sizeMB MB**
-      * Duration(HOURS:MM:SS.MICROSECONDS): **$!video.hmsDuration**
-      * Resolution(px): **$!video.resolution**
-      * Bitrate(kbps): **$!video.bitrate**
-   #end
-#end
-{{/velocity}}</content>
+{{include reference="XWiki.LiveTableResults" /}}</content>
 </xwikidoc>

@@ -53,6 +53,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.FileUtils;
 import javax.activation.MimetypesFileTypeMap;
 import org.xwiki.environment.Environment;
+import java.util.Date;
 
 class VideoUploadClass
 {
@@ -182,33 +183,34 @@ class VideoUploadClass
    * Upload a video
    * 
    * @param formFieldName the file input name
+   * @param targetDocRef the document reference of target xwiki document in which the videos will be attached.
    * @param encodeVideo boolean that indicate to encode the video or not (Default value: false)
    * @return true if the upload is succesfull, false if the upload failed.
    */
-   def uploadVideo(formFieldName, encodeVideo = false){
+   def uploadVideo(formFieldName, targetDocRef = "", encodeVideo = false){
       def rep = ["ret": false, "error": ""];
       def fileItems = this.fileUploader.getFileItems();
       for(item in fileItems){
         if(item.getFieldName() == formFieldName){
             def fileName = item.getName();
             InputStream inputStream = item.getInputStream();
+            File videoDir;
             if(!this.checkFileExists(userXWikiTubeDir, fileName)){
                // Create the file
-               File videoDir = new File(userXWikiTubeDir, fileName);
-               if (!videoDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
-               rep["ret"] = this.createFileFromInputStream(videoDir.getPath(), fileName, inputStream);
-               def filePath = this.fileNameUtils.concat(videoDir.getPath(), fileName);
-               rep["video"] = this.getVideoInfo(filePath);
-               rep["video"]["original"] = 1;
-               // Create an XWikiTube entry for the uploaded video
-               rep["video"]["videoDocRef"] = this.createVideoEntry(rep["video"]);
-               this.attachFileToDoc(rep["video"]["videoDocRef"],  rep["video"]["name"], filePath);
+               videoDir = new File(userXWikiTubeDir, fileName);
             }
             else
             {
-               rep["ret"] = false;
-               rep["error"] = "file_exists";
+               videoDir = new File(userXWikiTubeDir, fileName + "_" + new Date().getTime() + "_" + xwiki.generateRandomString(10));
             }
+            if (!videoDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
+            rep["ret"] = this.createFileFromInputStream(videoDir.getPath(), fileName, inputStream);
+            def filePath = this.fileNameUtils.concat(videoDir.getPath(), fileName);
+            rep["video"] = this.getVideoInfo(filePath);
+            rep["video"]["original"] = 1;
+            // Create an XWikiTube entry for the uploaded video
+            rep["video"]["videoDocRef"] = this.createVideoEntry(rep["video"], targetDocRef);
+            this.attachFileToDoc(rep["video"]["videoDocRef"], rep["video"]["name"], filePath);
         }
       }
       return rep;
@@ -279,7 +281,7 @@ class VideoUploadClass
    * @param videoCodec the video codec will be used to encode the video
    * @param settings encoding settings
    */
-   def encodeVideo(videoDocRef, videoCodec, settings = null){
+   void encodeVideo(videoDocRef, videoCodec, settings = null){
       if(videoDocRef != "" &amp;&amp; xwiki.exists(videoDocRef)){
          def videoDoc = xwiki.getDocument(videoDocRef);
          def sourceVideoObject = videoDoc.getObject("XWikiTubeCode.MediaClass", "original", "1");

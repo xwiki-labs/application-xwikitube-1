@@ -1,0 +1,480 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
+<xwikidoc>
+  <web>XWikiTubeCode</web>
+  <name>XWikiTubeSheet</name>
+  <language/>
+  <defaultLanguage/>
+  <translation>0</translation>
+  <parent>XWikiTubeClass</parent>
+  <creator>xwiki:XWiki.Admin</creator>
+  <author>xwiki:XWiki.Admin</author>
+  <customClass/>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
+  <creationDate>1449220864000</creationDate>
+  <date>1449439427000</date>
+  <contentUpdateDate>1449439427000</contentUpdateDate>
+  <version>1.1</version>
+  <title/>
+  <defaultTemplate/>
+  <validationScript/>
+  <comment/>
+  <minorEdit>false</minorEdit>
+  <syntaxId>xwiki/2.1</syntaxId>
+  <hidden>true</hidden>
+  <object>
+    <class>
+      <name>XWiki.JavaScriptExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>XWikiTubeCode.XWikiTubeSheet</name>
+    <number>0</number>
+    <className>XWiki.JavaScriptExtension</className>
+    <guid>aaa6a64e-c9e2-4380-a359-80ff34e6bcd3</guid>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>require(['jquery'], function($){
+  $(function(){
+    $(".integrate-btn").click(function(event){
+      $("div.embed-code", $(this).parent()).slideToggle();
+    });  
+  });
+});</code>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse/>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <object>
+    <class>
+      <name>XWiki.StyleSheetExtension</name>
+      <customClass/>
+      <customMapping/>
+      <defaultViewSheet/>
+      <defaultEditSheet/>
+      <defaultWeb/>
+      <nameField/>
+      <validationScript/>
+      <cache>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>cache</name>
+        <number>5</number>
+        <prettyName>Caching policy</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>long|short|default|forbid</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </cache>
+      <code>
+        <disabled>0</disabled>
+        <name>code</name>
+        <number>2</number>
+        <prettyName>Code</prettyName>
+        <rows>20</rows>
+        <size>50</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+      </code>
+      <contentType>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>contentType</name>
+        <number>6</number>
+        <prettyName>Content Type</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>CSS|LESS</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </contentType>
+      <name>
+        <disabled>0</disabled>
+        <name>name</name>
+        <number>1</number>
+        <prettyName>Name</prettyName>
+        <size>30</size>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+      </name>
+      <parse>
+        <disabled>0</disabled>
+        <displayFormType>select</displayFormType>
+        <displayType>yesno</displayType>
+        <name>parse</name>
+        <number>4</number>
+        <prettyName>Parse content</prettyName>
+        <unmodifiable>0</unmodifiable>
+        <classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+      </parse>
+      <use>
+        <cache>0</cache>
+        <disabled>0</disabled>
+        <displayType>select</displayType>
+        <multiSelect>0</multiSelect>
+        <name>use</name>
+        <number>3</number>
+        <prettyName>Use this extension</prettyName>
+        <relationalStorage>0</relationalStorage>
+        <separator> </separator>
+        <separators>|, </separators>
+        <size>1</size>
+        <unmodifiable>0</unmodifiable>
+        <values>currentPage|onDemand|always</values>
+        <classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+      </use>
+    </class>
+    <name>XWikiTubeCode.XWikiTubeSheet</name>
+    <number>0</number>
+    <className>XWiki.StyleSheetExtension</className>
+    <guid>67527897-cca2-4188-9143-6dd3806bfe9e</guid>
+    <property>
+      <cache>long</cache>
+    </property>
+    <property>
+      <code>.tab-pane{
+}
+
+.tab-pane.active, .nav.nav-tabs li.active a{
+  background: #f5f5f5 !important;
+}
+
+.video-blk, .video-advanced{
+  margin-left: 10px !important;
+  padding-bottom: 10px !important;
+  padding-top: 5px !important;
+}
+
+.video-advanced{
+  overflow: hidden;  
+}
+
+.video-description{
+  background: #fff;
+  padding-left: 10px;
+  padding-bottom: 10px;
+  width: 100%;
+}
+
+.video-description h3{
+  font-weight: normal;
+}
+
+.video-description h5{
+  font-weight: bold;
+}
+
+.video-description .share-blk{
+  /*border-top: 1px solid #ddd;*/
+  margin-top: 10px;
+}
+.video-author{
+   height: 50px;
+   clear: both;
+}
+
+.video-author .username, .video-author img{
+  float: left !important;
+}
+
+.video-author .username{
+  padding-left: 5px !important;
+}
+
+.embed-code{
+  width: 99%;
+  margin-top: 2px;
+}
+
+.same-videos-panel .videothumb{
+  width: 98%;
+  height: 90px;
+  background: #fff;
+  margin-bottom: 5px;
+}
+
+.same-videos-panel .videothumb .glyphicon{
+  font-size: 90px;
+  padding-left: 5px;
+}
+
+.same-videos-panel .videothumb .info{
+  position: absolute;
+  padding-left: 5px;
+  font-size: 0.8em;
+}
+
+.same-videos-panel .videothumb .info .author{
+  display: block;
+  color: #bbb;
+}
+.same-videos-panel .videothumb .info .author a{
+  color: #bbb;
+}
+
+.same-videos-panel .videothumb .duration{
+  position: relative;
+  float: right;
+  font-size: 0.8em;
+  background: #333;
+  color: #fff;
+  top: 100%;
+  padding: 1px 5px;
+  margin-top: -20px
+}</code>
+    </property>
+    <property>
+      <contentType>CSS</contentType>
+    </property>
+    <property>
+      <name/>
+    </property>
+    <property>
+      <parse/>
+    </property>
+    <property>
+      <use>onDemand</use>
+    </property>
+  </object>
+  <content>{{velocity}}
+{{html wiki="true"}}
+#set ($discard = $doc.use('XWikiTubeCode.XWikiTubeClass'))
+#set ($discard = $services.localization.use('document', 'XWikiTubeCode.XWikiTubeTranslations'))
+#if ($xcontext.action == "view") 
+   #set($mediaTranscoder = $xwiki.parseGroovyFromPage("XWikiTubeCode.MediaTranscoderGroovy"))
+   #set($discard = $mediaTranscoder.init($xwiki, $xcontext, $services))
+   #set($discard = $xwiki.ssx.use("XWikiTubeCode.XWikiTubeSheet"))
+   #set($discard = $xwiki.jsx.use("XWikiTubeCode.XWikiTubeSheet")) 
+#end
+#set($originalMediaObj = $doc.getObject("XWikiTubeCode.MediaClass", "original", 1))
+## Get the video in the same category
+#set($videoCategories = $doc.getValue("category"))
+#set($categoryFilter = "")
+#foreach($c in $videoCategories)
+   #if ($categoryFilter == "")
+      #set($categoryFilter = "and (video.category like '%$c%'")
+   #else
+      #set($categoryFilter = "${categoryFilter} or video.category like '%$c%'")
+   #end
+#end
+#if ($categoryFilter != "")
+   #set($categoryFilter = "${categoryFilter})")
+#end
+#set($xwql = "from doc.object(XWikiTubeCode.XWikiTubeClass) as video where doc.fullName &lt;&gt; '$doc.fullName' and doc.fullName &lt;&gt; 'XWikiTubeCode.XWikiTubeTemplate' $categoryFilter order by video.title")
+#set($results = $services.query.xwql($xwql).execute())
+#set($sameCategoryVideos = [])
+#foreach($v in $results)
+   #set($videoDoc = $xwiki.getDocument($v))
+   #if ($videoDoc.getObject("XWikiTubeCode.MediaClass", "original", 1))
+      #set($discard = $sameCategoryVideos.add($v))
+   #end
+#end
+##
+&lt;div&gt;
+   &lt;ul class="nav nav-tabs" role="tablist"&gt;
+    &lt;li class="active"&gt;&lt;a href="#basicinfo" aria-controls="basicinfo" role="tab" data-toggle="tab"&gt;Video&lt;/a&gt;&lt;/li&gt;
+    #if ($xcontext.action == "view")
+    &lt;li&gt;&lt;a href="#video" aria-controls="video" role="tab" data-toggle="tab"&gt;Advanced info&lt;/a&gt;&lt;/li&gt;
+    #end
+  &lt;/ul&gt;
+  &lt;div class="tab-content"&gt;
+    &lt;div role="tabpanel" class="tab-pane active" id="basicinfo"&gt;
+    #if ($xcontext.action == "view")
+       #if(!$originalMediaObj)
+       &lt;div class="video-blk"&gt;
+       &lt;br/&gt;
+
+       {{videoupload targetDoc="$doc.getDocumentReference()"/}}
+
+       &lt;/div&gt;
+       #else
+          &lt;div class="row video-blk"&gt;
+             &lt;div class="col-md-9 video-panel"&gt;
+
+                {{video dash="$doc.getDocumentReference()" height="450"/}}
+
+                &lt;div class="video-description"&gt;
+                   &lt;h3&gt;
+                   $doc.display('title') 
+                   &lt;/h3&gt;
+                   &lt;div class="video-author"&gt;
+                   {{useravatar username="$doc.getAuthorReference()" width="40"/}}
+                   &lt;div class="username"&gt;$xwiki.getUserName($doc.getAuthorReference())&lt;/div&gt;
+                   &lt;/div&gt;
+                   &lt;div class="share-blk"&gt;
+                      &lt;button type="button" class="btn btn-xs" class="integrate-btn"&gt;
+                         &lt;span class="glyphicon glyphicon-share-alt" aria-hidden="true"&gt;&lt;/span&gt; Integrate the video in your wiki page
+                      &lt;/button&gt;
+                      &lt;div class="embed-code" style="display: none;"&gt;
+
+                      {{code}}{{video dash="$doc.getDocumentReference()" /}}{{/code}}
+
+                      &lt;/div&gt;
+                   &lt;/div&gt;
+                   &lt;h5&gt;Published on $datetool.get('default','short') &lt;/h5&gt;
+                   &lt;p&gt;
+                   $doc.display('description')    
+                   &lt;/p&gt;
+                   &lt;p&gt;
+                   &lt;strong&gt;Category:&lt;/strong&gt; $doc.display('category')
+                   &lt;/p&gt;
+                &lt;/div&gt;
+             &lt;/div&gt;
+             #if ($sameCategoryVideos.size() &gt; 0)
+             &lt;div class="col-md-3 same-videos-panel"&gt;
+                &lt;h4&gt;Videos in the same category&lt;/h4&gt;
+                #foreach($v in $sameCategoryVideos)
+                   #set($vdoc = $xwiki.getDocument($v))
+                   #set($xwikiTubeObj = $vdoc.getObject("XWikiTubeCode.XWikiTubeClass"))
+                   #set($videoInfo = $vdoc.getObject("XWikiTubeCode.MediaClass", "original", 1))
+                   &lt;div class="videothumb"&gt;
+                   &lt;div class="glyphicon glyphicon-facetime-video" aria-hidden="true"&gt;&lt;/div&gt;
+                   &lt;span class="info"&gt;
+                   &lt;a href="$xwiki.getURL($v)"&gt;
+                      $xwikiTubeObj.title
+                   &lt;/a&gt;
+                   &lt;span class="author"&gt;by $xwiki.getUserName($vdoc.getCreatorReference())&lt;/span&gt;
+                   &lt;/span&gt;
+                   &lt;span class="duration"&gt;
+                   $!mediaTranscoder.formatDuration($videoInfo.getValue("duration"))
+                   &lt;/span&gt;
+                   &lt;/div&gt;
+                #end
+             &lt;/div&gt;
+             #end
+          &lt;/div&gt;
+       #end
+    #end
+    #if ( ($xcontext.action == "edit") || ($xcontext.action == "view" &amp;&amp; !$originalMediaObj))
+    (% class="xform video-advanced" %)
+    (((
+    ; &lt;label for="XWikiTubeCode.XWikiTubeClass_0_title"&gt;$escapetool.xml($doc.displayPrettyName('title', false, false))&lt;/label&gt;
+    : $doc.display('title')
+    ; &lt;label for="XWikiTubeCode.XWikiTubeClass_0_category"&gt;$escapetool.xml($doc.displayPrettyName('category', false, false))     &lt;/label&gt;
+    : $doc.display('category')
+    ; &lt;label for="XWikiTubeCode.XWikiTubeClass_0_description"&gt;$escapetool.xml($doc.displayPrettyName('description', false, false))&lt;/label&gt;
+    : $doc.display('description')
+    )))
+    #end
+    &lt;/div&gt;
+    &lt;div role="tabpanel" class="tab-pane" id="video"&gt;
+       &lt;div class="video-blk"&gt;
+          #if ($xcontext.action == "view")
+             #if($originalMediaObj)
+                {{include reference="XWikiTubeCode.MediaSheet"/}}
+             #else
+
+                {{warning}}No video was uploaded.{{/warning}}
+
+             #end
+          #end   
+       &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/div&gt;
+{{/html}}
+{{/velocity}}</content>
+</xwikidoc>
