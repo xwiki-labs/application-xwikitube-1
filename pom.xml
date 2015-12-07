@@ -27,7 +27,7 @@
   <parent>
     <groupId>org.xwiki.commons</groupId>
     <artifactId>xwiki-commons-pom</artifactId>
-    <version>7.2-SNAPSHOT</version>
+    <version>7.0</version>
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-xwikitube</artifactId>
@@ -36,9 +36,9 @@
   <packaging>xar</packaging>
   <description>Application to upload, encode and play videos</description>
   <scm>
-    <connection>scm:git:git://github.com/xwiki-labs/application-xwikitube.git</connection>
-    <developerConnection>scm:git:git@github.com:xwiki-labs/application-xwikitube.git</developerConnection>
-    <url>https://github.com/xwiki-labs/application-xwikitube</url>
+    <connection>scm:git:git://github.com/xwiki-contrib/application-xwikitube.git</connection>
+    <developerConnection>scm:git:git@github.com:xwiki-contrib/application-xwikitube.git</developerConnection>
+    <url>https://github.com/xwiki-contrib/application-xwikitube</url>
   </scm>
   <developers>
     <developer>
@@ -49,6 +49,8 @@
   <properties>
     <!-- Don't run CLIRR here since there's no Java code. -->
     <xwiki.clirr.skip>true</xwiki.clirr.skip>
+    <!-- The extension's category -->
+   <xwiki.extension.category>application</xwiki.extension.category>
   </properties>
   <build>
     <!-- Needed to add support for the XAR packaging -->
