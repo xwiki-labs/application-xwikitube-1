@@ -1,21 +1,41 @@
-<?xml version='1.0' encoding='UTF-8'?>
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * See the NOTICE file distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This is free software; you can redistribute it and/or modify it
+ * under the terms of the GNU Lesser General Public License as
+ * published by the Free Software Foundation; either version 2.1 of
+ * the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this software; if not, write to the Free
+ * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
+ * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
+-->
+
 <xwikidoc version="1.1">
   <web>Macros</web>
   <name>Video20</name>
   <language/>
   <defaultLanguage/>
   <translation>0</translation>
-  <creator>XWiki.Admin</creator>
+  <creator>xwiki:XWiki.Admin</creator>
   <creationDate>1405605988000</creationDate>
   <parent>Macros.WebHome</parent>
-  <author>XWiki.Admin</author>
-  <contentAuthor>XWiki.Admin</contentAuthor>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <date>1449439172000</date>
   <contentUpdateDate>1449436335000</contentUpdateDate>
-  <version>2.7</version>
+  <version>1.1</version>
   <title>Video Macro</title>
   <comment/>
-  <minorEdit>true</minorEdit>
+  <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.0</syntaxId>
   <hidden>true</hidden>
   <content>Example usage:
@@ -62,7 +82,7 @@ Attachment:
 </content>
   <attachment>
     <filename>test-vid.webm</filename>
-    <author>XWiki.Admin</author>
+    <author>xwiki:XWiki.Admin</author>
     <date>1446212415000</date>
     <version>1.1</version>
     <comment/>
@@ -149,57 +169,57 @@ Attachment:
       <cache>long</cache>
     </property>
     <property>
-      <code>// Configure require.js to use video.js and dash.js (https://github.com/videojs/video.js/blob/stable/docs/guides/setup.md)&#xd;
-// (https://github.com/Dash-Industry-Forum/dash.js)&#xd;
-require.config({&#xd;
-   "paths": { &#xd;
-            "video-js": "$services.webjars.url('video-js/4.11.4/video.js')",&#xd;
-            //"dash-webm": "$services.webjars.url('dash.js/1.5-SNAPSHOT/contrib/webmjs/dash.webm.min.js')",&#xd;
-            "dash-webm": "$xwiki.getDocument('XWikiTubeCode.DashJsPlugins').getAttachmentURL('dash.webm.min', 'download')",&#xd;
-            //"videojs-dashjs": "$services.webjars.url('dash.js/1.5-SNAPSHOT/contrib/videojs/videojs-tech-dashjs.js')"&#xd;
-            "videojs-dashjs": "$xwiki.getDocument('XWikiTubeCode.DashJsPlugins').getAttachmentURL('videojs-tech-dashjs', 'download')"&#xd;
-            }&#xd;
-});&#xd;
-&#xd;
-// Load the video-js css file&#xd;
-function loadCss(url) {&#xd;
-    var link = document.createElement("link");&#xd;
-    link.type = "text/css";&#xd;
-    link.rel = "stylesheet";&#xd;
-    link.href = url;&#xd;
-    document.getElementsByTagName("head")[0].appendChild(link);&#xd;
-}&#xd;
-&#xd;
-// Set up DASH player &#xd;
-function setupPlayer(videoDashID) {&#xd;
-   // If the dash is not supported on the browser, play an flv video&#xd;
-   if (videojs.Dashjs.isSupported()) {&#xd;
-      // Initalize the video.js player&#xd;
-      var myPlayer = videojs(videoDashID, {context:new Webm.di.WebmContext()});&#xd;
-   }&#xd;
-   else&#xd;
-   {&#xd;
-      var flvVideoURL = document.getElementById(videoDashID).getElementsByClassName("flv-video-url")[0].value;&#xd;
-      var sourceElement = document.getElementById(videoDashID).getElementsByTagName("source")[0];&#xd;
-      sourceElement.setAttribute("src", flvVideoURL);&#xd;
-      sourceElement.setAttribute("type", "video/x-flv");&#xd;
-      videojs(videoDashID);&#xd;
-   }&#xd;
-}&#xd;
-&#xd;
-require(['jquery', 'dash-webm', 'video-js'], function($, dashwebm, videojs){&#xd;
-   loadCss("$services.webjars.url('video-js/4.11.4/video-js.min.css')");&#xd;
-   videojs.options.flash.swf = "$services.webjars.url('video-js/4.11.4/video-js.swf')";&#xd;
-   require(["videojs-dashjs"], function(videojsdash){&#xd;
-      $(function(){&#xd;
-         // Initialize DASH videos&#xd;
-         $("video.dashvideo").each(function(index){&#xd;
-            var videoDashID = "dash-video" + index;&#xd;
-            $(this).attr("id", videoDashID);&#xd;
-            setupPlayer(videoDashID);&#xd;
-         });&#xd;
-      });&#xd;
-   });&#xd;
+      <code>// Configure require.js to use video.js and dash.js (https://github.com/videojs/video.js/blob/stable/docs/guides/setup.md)
+// (https://github.com/Dash-Industry-Forum/dash.js)
+require.config({
+   "paths": { 
+            "video-js": "$services.webjars.url('video-js/4.11.4/video.js')",
+            //"dash-webm": "$services.webjars.url('dash.js/1.5-SNAPSHOT/contrib/webmjs/dash.webm.min.js')",
+            "dash-webm": "$xwiki.getDocument('XWikiTubeCode.DashJsPlugins').getAttachmentURL('dash.webm.min', 'download')",
+            //"videojs-dashjs": "$services.webjars.url('dash.js/1.5-SNAPSHOT/contrib/videojs/videojs-tech-dashjs.js')"
+            "videojs-dashjs": "$xwiki.getDocument('XWikiTubeCode.DashJsPlugins').getAttachmentURL('videojs-tech-dashjs', 'download')"
+            }
+});
+
+// Load the video-js css file
+function loadCss(url) {
+    var link = document.createElement("link");
+    link.type = "text/css";
+    link.rel = "stylesheet";
+    link.href = url;
+    document.getElementsByTagName("head")[0].appendChild(link);
+}
+
+// Set up DASH player 
+function setupPlayer(videoDashID) {
+   // If the dash is not supported on the browser, play an flv video
+   if (videojs.Dashjs.isSupported()) {
+      // Initalize the video.js player
+      var myPlayer = videojs(videoDashID, {context:new Webm.di.WebmContext()});
+   }
+   else
+   {
+      var flvVideoURL = document.getElementById(videoDashID).getElementsByClassName("flv-video-url")[0].value;
+      var sourceElement = document.getElementById(videoDashID).getElementsByTagName("source")[0];
+      sourceElement.setAttribute("src", flvVideoURL);
+      sourceElement.setAttribute("type", "video/x-flv");
+      videojs(videoDashID);
+   }
+}
+
+require(['jquery', 'dash-webm', 'video-js'], function($, dashwebm, videojs){
+   loadCss("$services.webjars.url('video-js/4.11.4/video-js.min.css')");
+   videojs.options.flash.swf = "$services.webjars.url('video-js/4.11.4/video-js.swf')";
+   require(["videojs-dashjs"], function(videojsdash){
+      $(function(){
+         // Initialize DASH videos
+         $("video.dashvideo").each(function(index){
+            var videoDashID = "dash-video" + index;
+            $(this).attr("id", videoDashID);
+            setupPlayer(videoDashID);
+         });
+      });
+   });
 });</code>
     </property>
     <property>
@@ -308,16 +328,16 @@ require(['jquery', 'dash-webm', 'video-js'], function($, dashwebm, videojs){&#xd
       <cache>long</cache>
     </property>
     <property>
-      <code>#set($videojsURL = $services.webjars.url('video-js/4.11.4/'))&#xd;
-@font-face{&#xd;
-  font-family: 'VideoJS';&#xd;
-  src: url('${videojsURL}font/vjs.eot');&#xd;
-  src: url('${videojsURL}font/vjs.eot?#iefix') format('embedded-opentype'),&#xd;
-  url('${videojsURL}font/vjs.woff') format('woff'),&#xd;
-  url('${videojsURL}font/vjs.ttf') format('truetype'),&#xd;
-  url('${videojsURL}font/vjs.svg#icomoon') format('svg');&#xd;
-  font-weight: normal;&#xd;
-  font-style: normal;&#xd;
+      <code>#set($videojsURL = $services.webjars.url('video-js/4.11.4/'))
+@font-face{
+  font-family: 'VideoJS';
+  src: url('${videojsURL}font/vjs.eot');
+  src: url('${videojsURL}font/vjs.eot?#iefix') format('embedded-opentype'),
+  url('${videojsURL}font/vjs.woff') format('woff'),
+  url('${videojsURL}font/vjs.ttf') format('truetype'),
+  url('${videojsURL}font/vjs.svg#icomoon') format('svg');
+  font-weight: normal;
+  font-style: normal;
 }</code>
     </property>
     <property>
@@ -448,147 +468,147 @@ require(['jquery', 'dash-webm', 'video-js'], function($, dashwebm, videojs){&#xd
       </visibility>
     </class>
     <property>
-      <code>{{velocity output=false}}&#xd;
-&#xd;
-Compute the URL of the embedded video from the original web URL.&#xd;
-&#xd;
-#set ($url = '')&#xd;
-#if ($xcontext.macro.params.url.indexOf('dailymotion') != -1)&#xd;
-  ## DailyMotion URLs have the following format:&#xd;
-  ## http://www.dailymotion.com/video/&lt;videoId>_&lt;pretty-name>&#xd;
-  ## which should be transformed into:&#xd;
-  ## http://www.dailymotion.com/swf/&lt;videoId>&#xd;
-  #set ($url = $xcontext.macro.params.url.replaceAll('^.*/video/(.*)_.*$', '//www.dailymotion.com/embed/video/$1'))&#xd;
-#elseif ($xcontext.macro.params.url.indexOf('youtube') != -1)&#xd;
-  ## YouTube URLs have the following format:&#xd;
-  ## http://www.youtube.com/watch?v=&lt;videoId>&amp;otherParams&#xd;
-  ## which should be transformed into:&#xd;
-  ## https://youtube.googleapis.com/v/&lt;videoId>&#xd;
-  #set ($url = $xcontext.macro.params.url.replaceAll('^.*?[&amp;?]v=(.*?)(&amp;.*|$)', '//www.youtube.com/embed/$1'))&#xd;
-#elseif ($xcontext.macro.params.url.indexOf('youtu.be') != -1)&#xd;
-  ## YouTube URLs have the following format:&#xd;
-  ## http://www.youtube.com/watch?v=&lt;videoId>&amp;otherParams&#xd;
-  ## which should be transformed into:&#xd;
-  ## https://youtube.googleapis.com/v/&lt;videoId>&#xd;
-  #set ($url = $xcontext.macro.params.url.replaceAll('^.*youtu.be/(.*?)(&amp;.*|$)', '//www.youtube.com/embed/$1'))&#xd;
-#elseif ($xcontext.macro.params.url.indexOf('google') != -1)&#xd;
-  ## Google Video URLs have the following format:&#xd;
-  ## http://video.google.com/videoplay?docid=&lt;videoId>&#xd;
-  ## which should be transformed into:&#xd;
-  ## http://video.google.com/googleplayer.swf?docid=&lt;videoId>&#xd;
-  #set ($url = $xcontext.macro.params.url.replaceAll('^.*?[&amp;?]docid=(.*?)(&amp;.*|$)', 'http://video.google.com/googleplayer.swf?docid=$1'))&#xd;
-#elseif ($xcontext.macro.params.url.indexOf('vimeo') != -1)&#xd;
-  ## Vimeo URLs have the following format:&#xd;
-  ## http://vimeo.com/&lt;videoId>&#xd;
-  ## which should be transformed into:&#xd;
-  ## http://vimeo.com/moogaloop.swf?clip_id=&lt;videoId>&amp;show_title=1&#xd;
-  #set ($url = $xcontext.macro.params.url.replaceAll('^.*?//.*?/(.*?)([#?].*|$)', '//player.vimeo.com/video/$1'))&#xd;
-#end&#xd;
-&#xd;
-Compute the width and height.&#xd;
-&#xd;
-#set ($width = $xcontext.macro.params.width)&#xd;
-#set ($height = $xcontext.macro.params.height)&#xd;
-&#xd;
-{{/velocity}}&#xd;
-{{velocity}}&#xd;
-#if ("$!url" != '')&#xd;
-&#xd;
-{{html wiki="false"}}&#xd;
-#if ($xcontext.macro.params.url.indexOf('google') != -1)&#xd;
-    &lt;object width="$!{width}" height="$!{height}" type="application/x-shockwave-flash" data="${url}">&lt;param name="movie" value="${url}">&lt;/param>&lt;param name="allowFullScreen" value="true">&lt;/param>&lt;/object>&#xd;
-#else&#xd;
-    &lt;iframe src="${url}" width="$!{width}" height="$!{height}" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen>&lt;/iframe>&#xd;
-#end&#xd;
-{{/html}}&#xd;
-&#xd;
-#else&#xd;
-   #if ("$!xcontext.macro.params.attachment" != '')&#xd;
-      ## read a video attachement&#xd;
-         #set($videoAttachmentName = $xcontext.macro.params.attachment)&#xd;
-         #if ($doc.getAttachment($videoAttachmentName))&#xd;
-            #set($discard = $xwiki.jsx.use("Macros.Video20"))&#xd;
-            #set($discard = $xwiki.ssx.use("Macros.Video20"))&#xd;
-            #set($videoURL = $doc.getAttachmentURL($videoAttachmentName))&#xd;
-            #set($videoPoster = "")&#xd;
-            #if("$!xcontext.macro.params.videoPoster" != '' &amp;&amp; $doc.getAttachment($xcontext.macro.params.videoPoster))&#xd;
-               #set($videoPoster = $doc.getAttachmentURL($xcontext.macro.params.videoPoster))&#xd;
-            #end&#xd;
-            #set($supportedVideoFormats = ["mp4", "webm", "ogv", "mov", "avi", "mkv", "flv"])&#xd;
-            #set($videoFormat = "")&#xd;
-            #set($videoMimeType = "")&#xd;
-            #set($formatIndex = $videoAttachmentName.lastIndexOf("."))&#xd;
-            #if ($formatIndex != -1)&#xd;
-               #set($videoFormat = $videoAttachmentName.substring($mathtool.add($formatIndex, 1), $videoAttachmentName.length()))&#xd;
-               #if (!$supportedVideoFormats.contains($videoFormat))&#xd;
-                  #set($videoFormat = "")&#xd;
-               #else&#xd;
-                  #set($videoMimeType = $videoFormat)&#xd;
-                  #if ($videoFormat == "ogv")&#xd;
-                     #set($videoFormat = "ogg")&#xd;
-                     #set($videoMimeType = "ogg")&#xd;
-                  #elseif ($videoFormat == "mov")&#xd;
-                     #set($videoMimeType = "quicktime")&#xd;
-                  #elseif ($videoFormat == "avi")&#xd;
-                     #set($videoMimeType = "x-msvideo")&#xd;
-                  #elseif ($videoFormat == "mkv")&#xd;
-                     #set($videoMimeType = "x-matroska")&#xd;
-                  #elseif ($videoFormat == "flv")&#xd;
-                     #set($videoMimeType = "x-flv")&#xd;
-                  #end&#xd;
-               #end&#xd;
-            #end&#xd;
-            #if ($videoFormat != "")&#xd;
-            {{html}}&#xd;
-               &lt;video class="video-js vjs-default-skin vjs-big-play-centered"&#xd;
-               controls preload="auto"&#xd;
-               width="${width}"&#xd;
-               height="${height}"&#xd;
-               poster="$!videoPoster"&#xd;
-               data-setup=''>&#xd;
-               &lt;source src="$videoURL" type="video/${videoMimeType}" />&#xd;
-               &lt;/video>&#xd;
-            {{/html}}&#xd;
-            #else&#xd;
-               {{warning}}Video format not supported.{{/warning}}&#xd;
-            #end&#xd;
-         #else&#xd;
-            {{warning}}Video attachment not found!{{/warning}}&#xd;
-         #end&#xd;
-   #elseif("$!xcontext.macro.params.dash" != '')&#xd;
-      #set($dashDocRef = $xcontext.macro.params.dash)&#xd;
-      #if($xwiki.exists($dashDocRef))&#xd;
-         #set($dashDoc = $xwiki.getDocument($dashDocRef))&#xd;
-         #set($manifestFile = $dashDoc.getAttachment("manifest.mpd"))&#xd;
-         #if($manifestFile)&#xd;
-            #set($manifestFileURL = $dashDoc.getAttachmentURL("manifest.mpd"))&#xd;
-            ## If the browser do not support DASH (Media Source Extensions) then display an flv low quality video&#xd;
-            #set($flvVideoURL = "")&#xd;
-            #if($dashDoc.getAttachment("video.flv"))&#xd;
-               #set($flvVideoURL = $dashDoc.getAttachmentURL("video.flv"))&#xd;
-            #end&#xd;
-            {{html}}&#xd;
-            #set($discard = $xwiki.jsx.use("Macros.Video20"))&#xd;
-            #set($discard = $xwiki.ssx.use("Macros.Video20"))&#xd;
-            &lt;video class="dashvideo video-js vjs-default-skin" controls preload="auto" width="$!{width}" height="$!{height}" >&#xd;
-            &lt;source src="$manifestFileURL" type="application/dash+xml">&#xd;
-            &lt;input type="hidden" class="flv-video-url" value="$flvVideoURL"/>&#xd;
-            &lt;/video>&#xd;
-            {{/html}}&#xd;
-         #else&#xd;
-            {{warning}}manifest.mpd attachment not found!{{/warning}} &#xd;
-         #end&#xd;
-      #else&#xd;
-         {{warning}}The DASH document not found!{{/warning}}&#xd;
-      #end&#xd;
-   #else&#xd;
-     {{warning}}The Video URL you entered ($!{xcontext.macro.params.url}) does not match any of the video websites supported by this macro. Please check the address you entered or improve the macro to make it support this website.{{/warning}}&#xd;
-   #end&#xd;
-#end&#xd;
+      <code>{{velocity output=false}}
+
+Compute the URL of the embedded video from the original web URL.
+
+#set ($url = '')
+#if ($xcontext.macro.params.url.indexOf('dailymotion') != -1)
+  ## DailyMotion URLs have the following format:
+  ## http://www.dailymotion.com/video/&lt;videoId&gt;_&lt;pretty-name&gt;
+  ## which should be transformed into:
+  ## http://www.dailymotion.com/swf/&lt;videoId&gt;
+  #set ($url = $xcontext.macro.params.url.replaceAll('^.*/video/(.*)_.*$', '//www.dailymotion.com/embed/video/$1'))
+#elseif ($xcontext.macro.params.url.indexOf('youtube') != -1)
+  ## YouTube URLs have the following format:
+  ## http://www.youtube.com/watch?v=&lt;videoId&gt;&amp;otherParams
+  ## which should be transformed into:
+  ## https://youtube.googleapis.com/v/&lt;videoId&gt;
+  #set ($url = $xcontext.macro.params.url.replaceAll('^.*?[&amp;?]v=(.*?)(&amp;.*|$)', '//www.youtube.com/embed/$1'))
+#elseif ($xcontext.macro.params.url.indexOf('youtu.be') != -1)
+  ## YouTube URLs have the following format:
+  ## http://www.youtube.com/watch?v=&lt;videoId&gt;&amp;otherParams
+  ## which should be transformed into:
+  ## https://youtube.googleapis.com/v/&lt;videoId&gt;
+  #set ($url = $xcontext.macro.params.url.replaceAll('^.*youtu.be/(.*?)(&amp;.*|$)', '//www.youtube.com/embed/$1'))
+#elseif ($xcontext.macro.params.url.indexOf('google') != -1)
+  ## Google Video URLs have the following format:
+  ## http://video.google.com/videoplay?docid=&lt;videoId&gt;
+  ## which should be transformed into:
+  ## http://video.google.com/googleplayer.swf?docid=&lt;videoId&gt;
+  #set ($url = $xcontext.macro.params.url.replaceAll('^.*?[&amp;?]docid=(.*?)(&amp;.*|$)', 'http://video.google.com/googleplayer.swf?docid=$1'))
+#elseif ($xcontext.macro.params.url.indexOf('vimeo') != -1)
+  ## Vimeo URLs have the following format:
+  ## http://vimeo.com/&lt;videoId&gt;
+  ## which should be transformed into:
+  ## http://vimeo.com/moogaloop.swf?clip_id=&lt;videoId&gt;&amp;show_title=1
+  #set ($url = $xcontext.macro.params.url.replaceAll('^.*?//.*?/(.*?)([#?].*|$)', '//player.vimeo.com/video/$1'))
+#end
+
+Compute the width and height.
+
+#set ($width = $xcontext.macro.params.width)
+#set ($height = $xcontext.macro.params.height)
+
+{{/velocity}}
+{{velocity}}
+#if ("$!url" != '')
+
+{{html wiki="false"}}
+#if ($xcontext.macro.params.url.indexOf('google') != -1)
+    &lt;object width="$!{width}" height="$!{height}" type="application/x-shockwave-flash" data="${url}"&gt;&lt;param name="movie" value="${url}"&gt;&lt;/param&gt;&lt;param name="allowFullScreen" value="true"&gt;&lt;/param&gt;&lt;/object&gt;
+#else
+    &lt;iframe src="${url}" width="$!{width}" height="$!{height}" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen&gt;&lt;/iframe&gt;
+#end
+{{/html}}
+
+#else
+   #if ("$!xcontext.macro.params.attachment" != '')
+      ## read a video attachement
+         #set($videoAttachmentName = $xcontext.macro.params.attachment)
+         #if ($doc.getAttachment($videoAttachmentName))
+            #set($discard = $xwiki.jsx.use("Macros.Video20"))
+            #set($discard = $xwiki.ssx.use("Macros.Video20"))
+            #set($videoURL = $doc.getAttachmentURL($videoAttachmentName))
+            #set($videoPoster = "")
+            #if("$!xcontext.macro.params.videoPoster" != '' &amp;&amp; $doc.getAttachment($xcontext.macro.params.videoPoster))
+               #set($videoPoster = $doc.getAttachmentURL($xcontext.macro.params.videoPoster))
+            #end
+            #set($supportedVideoFormats = ["mp4", "webm", "ogv", "mov", "avi", "mkv", "flv"])
+            #set($videoFormat = "")
+            #set($videoMimeType = "")
+            #set($formatIndex = $videoAttachmentName.lastIndexOf("."))
+            #if ($formatIndex != -1)
+               #set($videoFormat = $videoAttachmentName.substring($mathtool.add($formatIndex, 1), $videoAttachmentName.length()))
+               #if (!$supportedVideoFormats.contains($videoFormat))
+                  #set($videoFormat = "")
+               #else
+                  #set($videoMimeType = $videoFormat)
+                  #if ($videoFormat == "ogv")
+                     #set($videoFormat = "ogg")
+                     #set($videoMimeType = "ogg")
+                  #elseif ($videoFormat == "mov")
+                     #set($videoMimeType = "quicktime")
+                  #elseif ($videoFormat == "avi")
+                     #set($videoMimeType = "x-msvideo")
+                  #elseif ($videoFormat == "mkv")
+                     #set($videoMimeType = "x-matroska")
+                  #elseif ($videoFormat == "flv")
+                     #set($videoMimeType = "x-flv")
+                  #end
+               #end
+            #end
+            #if ($videoFormat != "")
+            {{html}}
+               &lt;video class="video-js vjs-default-skin vjs-big-play-centered"
+               controls preload="auto"
+               width="${width}"
+               height="${height}"
+               poster="$!videoPoster"
+               data-setup=''&gt;
+               &lt;source src="$videoURL" type="video/${videoMimeType}" /&gt;
+               &lt;/video&gt;
+            {{/html}}
+            #else
+               {{warning}}Video format not supported.{{/warning}}
+            #end
+         #else
+            {{warning}}Video attachment not found!{{/warning}}
+         #end
+   #elseif("$!xcontext.macro.params.dash" != '')
+      #set($dashDocRef = $xcontext.macro.params.dash)
+      #if($xwiki.exists($dashDocRef))
+         #set($dashDoc = $xwiki.getDocument($dashDocRef))
+         #set($manifestFile = $dashDoc.getAttachment("manifest.mpd"))
+         #if($manifestFile)
+            #set($manifestFileURL = $dashDoc.getAttachmentURL("manifest.mpd"))
+            ## If the browser do not support DASH (Media Source Extensions) then display an flv low quality video
+            #set($flvVideoURL = "")
+            #if($dashDoc.getAttachment("video.flv"))
+               #set($flvVideoURL = $dashDoc.getAttachmentURL("video.flv"))
+            #end
+            {{html}}
+            #set($discard = $xwiki.jsx.use("Macros.Video20"))
+            #set($discard = $xwiki.ssx.use("Macros.Video20"))
+            &lt;video class="dashvideo video-js vjs-default-skin" controls preload="auto" width="$!{width}" height="$!{height}" &gt;
+            &lt;source src="$manifestFileURL" type="application/dash+xml"&gt;
+            &lt;input type="hidden" class="flv-video-url" value="$flvVideoURL"/&gt;
+            &lt;/video&gt;
+            {{/html}}
+         #else
+            {{warning}}manifest.mpd attachment not found!{{/warning}} 
+         #end
+      #else
+         {{warning}}The DASH document not found!{{/warning}}
+      #end
+   #else
+     {{warning}}The Video URL you entered ($!{xcontext.macro.params.url}) does not match any of the video websites supported by this macro. Please check the address you entered or improve the macro to make it support this website.{{/warning}}
+   #end
+#end
 {{/velocity}}</code>
     </property>
     <property>
-      <contentDescription></contentDescription>
+      <contentDescription/>
     </property>
     <property>
       <contentType>No content</contentType>
@@ -597,10 +617,10 @@ Compute the width and height.&#xd;
       <defaultCategory>Content</defaultCategory>
     </property>
     <property>
-      <description>Display in your wiki page any video from Youtube, Dailymotion, Google Video or Vimeo.&#xd;
-&#xd;
-Also play a video attached to your wiki page using Video.js library. mp4, webm and ogv formats are supported.&#xd;
-&#xd;
+      <description>Display in your wiki page any video from Youtube, Dailymotion, Google Video or Vimeo.
+
+Also play a video attached to your wiki page using Video.js library. mp4, webm and ogv formats are supported.
+
 The video macro can also plays a DASH video (Dynamic Adaptive Streaming over HTTP).</description>
     </property>
     <property>
@@ -670,7 +690,7 @@ The video macro can also plays a DASH video (Dynamic Adaptive Streaming over HTT
       </name>
     </class>
     <property>
-      <defaultValue></defaultValue>
+      <defaultValue/>
     </property>
     <property>
       <description>The URL of the video you want to display on your page (Vimeo, Youtube, Daily Motion or Google Video only).</description>
@@ -868,7 +888,7 @@ The video macro can also plays a DASH video (Dynamic Adaptive Streaming over HTT
       </name>
     </class>
     <property>
-      <defaultValue></defaultValue>
+      <defaultValue/>
     </property>
     <property>
       <description>The name of the video attachment.</description>
@@ -934,10 +954,10 @@ The video macro can also plays a DASH video (Dynamic Adaptive Streaming over HTT
       </name>
     </class>
     <property>
-      <defaultValue></defaultValue>
+      <defaultValue/>
     </property>
     <property>
-      <description>The poster of the video is an image attachment that will be displayed before starting playing the video.&#xd;
+      <description>The poster of the video is an image attachment that will be displayed before starting playing the video.
 </description>
     </property>
     <property>
@@ -1001,7 +1021,7 @@ The video macro can also plays a DASH video (Dynamic Adaptive Streaming over HTT
       </name>
     </class>
     <property>
-      <defaultValue></defaultValue>
+      <defaultValue/>
     </property>
     <property>
       <description>The document in which the manifest.mpd file and the video streams are attached.</description>
