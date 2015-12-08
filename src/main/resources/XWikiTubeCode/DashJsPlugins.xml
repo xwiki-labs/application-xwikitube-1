@@ -5,6 +5,7 @@
   <language/>
   <defaultLanguage>en</defaultLanguage>
   <translation>0</translation>
+  <parent>XWikiTubeCode.WebHome</parent>
   <creator>XWiki.Admin</creator>
   <creationDate>1449436792000</creationDate>
   <author>XWiki.Admin</author>

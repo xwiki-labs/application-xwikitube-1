@@ -23,7 +23,7 @@
   <web>XWikiTubeCode</web>
   <name>XWikiTubeTranslations</name>
   <language/>
-  <defaultLanguage>en</defaultLanguage>
+  <defaultLanguage></defaultLanguage>
   <translation>0</translation>
   <parent>XWikiTubeClass</parent>
   <creator>xwiki:XWiki.Admin</creator>
