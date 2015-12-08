@@ -6,10 +6,10 @@
   <defaultLanguage>en</defaultLanguage>
   <translation>0</translation>
   <parent>XWikiTubeCode.WebHome</parent>
-  <creator>XWiki.Admin</creator>
+  <creator>xwiki:XWiki.Admin</creator>
   <creationDate>1449436792000</creationDate>
-  <author>XWiki.Admin</author>
-  <contentAuthor>XWiki.Admin</contentAuthor>
+  <author>xwiki:XWiki.Admin</author>
+  <contentAuthor>xwiki:XWiki.Admin</contentAuthor>
   <date>1449496420000</date>
   <contentUpdateDate>1449496420000</contentUpdateDate>
   <version>2.1</version>
