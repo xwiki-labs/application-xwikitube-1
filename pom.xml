@@ -31,7 +31,7 @@
   </parent>
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-xwikitube</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>1.0</version>
   <name>XWikiTube</name>
   <packaging>xar</packaging>
   <description>Application to upload, encode and play videos</description>
@@ -39,6 +39,7 @@
     <connection>scm:git:git://github.com/xwiki-contrib/application-xwikitube.git</connection>
     <developerConnection>scm:git:git@github.com:xwiki-contrib/application-xwikitube.git</developerConnection>
     <url>https://github.com/xwiki-contrib/application-xwikitube</url>
+    <tag>application-xwikitube-1.0</tag>
   </scm>
   <developers>
     <developer>
