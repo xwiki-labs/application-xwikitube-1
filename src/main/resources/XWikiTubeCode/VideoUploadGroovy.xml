@@ -259,15 +259,15 @@ class VideoUploadClass
          if(videoDoc){
             def videoID = videoDoc.createNewObject(mediaClass);
             def videoObj = videoDoc.getObject(mediaClass, videoID);
-            videoObj.set("name", videoInfo.name);
-            videoObj.set("dirPath", videoInfo.dirPath);
-            videoObj.set("extension", videoInfo.extension);
-            videoObj.set("mimeType", videoInfo.mimeType);
-            videoObj.set("resolution", videoInfo.resolution);
-            videoObj.set("size", videoInfo.size);
-            videoObj.set("duration", videoInfo.duration);
-            videoObj.set("bitrate", videoInfo.bitrate);
-            videoObj.set("original", videoInfo.original);
+            if(videoInfo.name){videoObj.set("name", videoInfo.name);}
+            if(videoInfo.dirPath){videoObj.set("dirPath", videoInfo.dirPath);}
+            if(videoInfo.extension){videoObj.set("extension", videoInfo.extension);}
+            if(videoInfo.mimeType){videoObj.set("mimeType", videoInfo.mimeType);}
+            if(videoInfo.resolution){videoObj.set("resolution", videoInfo.resolution);}
+            if(videoInfo.size){videoObj.set("size", videoInfo.size);}
+            if(videoInfo.duration){videoObj.set("duration", videoInfo.duration);}
+            if(videoInfo.bitrate){videoObj.set("bitrate", videoInfo.bitrate);}
+            if(videoInfo.original){videoObj.set("original", videoInfo.original);}
             videoDoc.save();
             rep = videoDocRef;
          }
@@ -389,6 +389,8 @@ class VideoUploadClass
          rep["duration"] = this.mediaTranscoder.getVideoDuration(videoPath, 's');
          rep["hmsDuration"] = this.mediaTranscoder.getVideoDuration(videoPath, 'hms');
          rep["bitrate"] = this.mediaTranscoder.getVideoBitrate(videoPath);
+         rep["original"] = 0;
+         rep["encoded"] = 0;
       }
       return rep;
    }
