@@ -84,5 +84,10 @@
     <artifactId>bootstrap-filestyle</artifactId>
     <version>1.2.1</version>
    </dependency>
+   <dependency>
+    <groupId>org.xwiki.contrib</groupId>
+    <artifactId>api-commandrunner</artifactId>
+    <version>1.2</version>
+   </dependency>
   </dependencies>
 </project>
