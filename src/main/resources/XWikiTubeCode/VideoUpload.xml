@@ -577,7 +577,7 @@ If this parameter is not mentioned when a document is created for each video.</d
               #if("$!videoDocRef" != '' &amp;&amp; $xwiki.exists($videoDocRef))
                  #set($discard = $videoUploader.encodeVideo($videoDocRef, "libvpx-vp9"))
                  #set($videoDoc = $xwiki.getDocument($videoDocRef))
-                 #set($videoObj = $videoDoc.getObject("XWikiTubeCode.MediaClass", "original", 1))
+                 #set($videoObj = $videoDoc.getObject("XWikiTubeCode.MediaClass", "original", "1"))
                  #if("$!videoObj" != '')
                     #set($discard = $videoObj.set("encoded", 1))
                     #set($discard = $videoDoc.save())

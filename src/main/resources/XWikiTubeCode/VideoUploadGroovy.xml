@@ -380,7 +380,7 @@ class VideoUploadClass
          rep["extension"]  = this.fileNameUtils.getExtension(rep["name"]);
          File videoFile = new File(videoPath);
          rep["size"] = this.fileUtils.sizeOf(videoFile);
-         rep["sizeMB"] = rep["size"]/(1000*1000);
+         rep["sizeMB"] = (rep["size"]/(1000*1000)).toString();
          MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
          rep["mimeType"] = mimeTypesMap.getContentType(videoFile);
          // Get the video resolution and duration

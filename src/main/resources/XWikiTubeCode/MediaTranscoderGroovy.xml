@@ -156,15 +156,16 @@ class MediaTranscodeClass
       def rep = -1;
       if(result.error == 'none'){
          rep = result.stdout.replace('size=', '');
+         rep = rep != '' ? rep.toLong() : 0;
          if(sizeUnit != 'B' &amp;&amp; sizeUnits.contains(sizeUnit)){
             if(sizeUnit == 'KB'){
-               rep = rep.toInteger()/(1000);
+               rep = rep/(1000);
             }
             else if(sizeUnit == 'MB'){
-               rep = rep.toInteger()/(1000*1000);
+               rep = rep/(1000*1000);
             }
             else if(sizeUnit == 'GB'){
-               rep = rep.toInteger()/(1000*1000*1000);
+               rep = rep/(1000*1000*1000);
             }
          }
       }
