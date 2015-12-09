@@ -32,7 +32,7 @@
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>application-xwikitube</artifactId>
   <version>1.1-SNAPSHOT</version>
-  <name>XWikiTube</name>
+  <name>XWikiTube Application</name>
   <packaging>xar</packaging>
   <description>Application to upload, encode and play videos</description>
   <scm>
