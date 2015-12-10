@@ -110,9 +110,20 @@ class MediaTranscodeClass
    * return the duration if the command excuted successfully or -1 otherwise.
    */
    def getVideoDuration(videoPath, format = 's'){
-      def durationFormat = (format == 'hms') ? '-sexagesimal ' : '';
-      def cmd = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ' + durationFormat + videoPath;
-      def result = this.commandRunner.run(cmd, '', 1000);
+      def durationFormat = (format == 'hms') ? '-sexagesimal' : '';
+      ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
+      cmdAL.add('ffprobe');
+      cmdAL.add('-v');
+      cmdAL.add('error');
+      cmdAL.add('-show_entries');
+      cmdAL.add('format=duration');
+      cmdAL.add('-of');
+      cmdAL.add('default=noprint_wrappers=1:nokey=1');
+      if(durationFormat != ''){
+         cmdAL.add(durationFormat);
+      }
+      cmdAL.add(videoPath);
+      def result = this.commandRunner.run(cmdAL, '', 1000);
       def rep = -1;
       if(result.error == 'none'){
          rep = result.stdout;
@@ -131,8 +142,16 @@ class MediaTranscodeClass
    * return the bitrate if the command excuted successfully or -1 otherwise.
    */
    def getVideoBitrate(videoPath){
-      def cmd = 'ffprobe -v error -show_entries format=bit_rate -of default=noprint_wrappers=1:nokey=1 ' + videoPath;
-      def result = this.commandRunner.run(cmd, '', 1000);
+      ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
+      cmdAL.add('ffprobe');
+      cmdAL.add('-v');
+      cmdAL.add('error');
+      cmdAL.add('-show_entries');
+      cmdAL.add('format=bit_rate');
+      cmdAL.add('-of');
+      cmdAL.add('default=noprint_wrappers=1:nokey=1');
+      cmdAL.add(videoPath);
+      def result = this.commandRunner.run(cmdAL, '', 1000);
       def rep = -1;
       if(result.error == 'none'){
          rep = result.stdout;
@@ -151,8 +170,16 @@ class MediaTranscodeClass
    */
    def getVideoSize(videoPath, sizeUnit = 'B'){
       def sizeUnits = ['KB', 'MB', 'GB'];
-      def cmd = 'ffprobe -v error -show_entries format=size -of default=noprint_wrappers=1 ' + videoPath;
-      def result = this.commandRunner.run(cmd, '', 1000);
+      ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
+      cmdAL.add('ffprobe');
+      cmdAL.add('-v');
+      cmdAL.add('error');
+      cmdAL.add('-show_entries');
+      cmdAL.add('format=size');
+      cmdAL.add('-of');
+      cmdAL.add('default=noprint_wrappers=1');
+      cmdAL.add(videoPath);
+      def result = this.commandRunner.run(cmdAL, '', 1000);
       def rep = -1;
       if(result.error == 'none'){
          rep = result.stdout.replace('size=', '');
@@ -183,8 +210,18 @@ class MediaTranscodeClass
    * return the resolution if the command excuted successfully or -1 otherwise.
    */
    def getVideoResolution(videoPath, retMode = 'arr'){
-      def cmd = 'ffprobe -v error -of flat=s=_ -select_streams v:0 -show_entries stream=height,width ' + videoPath;
-      def result = this.commandRunner.run(cmd, '', 1000);
+      ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
+      cmdAL.add('ffprobe');
+      cmdAL.add('-v');
+      cmdAL.add('error');
+      cmdAL.add('-of');
+      cmdAL.add('flat=s=_');
+      cmdAL.add('-select_streams');
+      cmdAL.add('v:0');
+      cmdAL.add('-show_entries');
+      cmdAL.add('stream=height,width');
+      cmdAL.add(videoPath);
+      def result = this.commandRunner.run(cmdAL, '', 1000);
       def rep = -1;
       if(result.error == 'none'){
          rep = result.stdout.replace("streams_stream_0_width=", "").replace("streams_stream_0_height=", "");
@@ -205,29 +242,48 @@ class MediaTranscodeClass
    * @return the ffmpeg encoding command 
    */
    def generateVideoEncodingCommand(videoPath, targetVideoDir, options, videoCodec = "libvpx-vp9"){
-      def cmd = '';
+      ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
       if(videoCodec == "libvpx-vp9"){
-         cmd = 'ffmpeg -i ' + videoPath + ' -c:v libvpx-vp9';
+         cmdAL.add('ffmpeg');
+         cmdAL.add('-i');
+         cmdAL.add(videoPath);
+         cmdAL.add('-c:v');
+         cmdAL.add('libvpx-vp9');
          // Resolution
-         cmd += ' -s ' + options.width.toString() + "x" + options.height.toString();
+         cmdAL.add('-s');
+         cmdAL.add(options.width.toString() + "x" + options.height.toString());
          // Bitrate
          def bitrate = (options.bitrate instanceof String) ? options.bitrate : options.bitrate[0] + '-' + options.bitrate[1];
          if(options.bitrate instanceof String){
-            cmd += ' -b:v ' + options.bitrate;
+            cmdAL.add('-b:v');
+            cmdAL.add(options.bitrate);
          }
          else
          {
-            cmd += ' -minrate ' + options.bitrate[0] + ' -maxrate ' + options.bitrate[1];
+            cmdAL.add('-minrate');
+            cmdAL.add(options.bitrate[0]);
+            cmdAL.add('-maxrate');
+            cmdAL.add(options.bitrate[1]);
          }
          // other parameters
-         cmd += ' -keyint_min 150 -g 150';
+         cmdAL.add('-keyint_min');
+         cmdAL.add('150');
+         cmdAL.add('-g');
+         cmdAL.add('150');
          // Dash parameters
-         cmd += ' -tile-columns 4 -frame-parallel 1 ';
-         cmd += ' -an -f webm -dash 1';
+         cmdAL.add('-tile-columns');
+         cmdAL.add('4');
+         cmdAL.add('-frame-parallel');
+         cmdAL.add('1');
+         cmdAL.add('-an');
+         cmdAL.add('-f');
+         cmdAL.add('webm');
+         cmdAL.add('-dash');
+         cmdAL.add('1');
          // Target video name
-         cmd += ' ' + targetVideoDir + '/' + 'video_' + options.resolution + '_' + bitrate + '.webm';
+         cmdAL.add(targetVideoDir + '/' + 'video_' + options.resolution + '_' + bitrate + '.webm');
       }
-      return cmd;
+      return cmdAL;
    }
 
    /**
@@ -238,23 +294,31 @@ class MediaTranscodeClass
    * @return the ffmpeg encoding command 
    */
    def generateFlvEncodingCommand(videoPath, targetVideoDir, options){
-      def cmd = '';
-      cmd = 'ffmpeg -i ' + videoPath + ' -c:v libx264';
+      ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
+      cmdAL.add('ffmpeg');
+      cmdAL.add('-i');
+      cmdAL.add(videoPath);
+      cmdAL.add('-c:v');
+      cmdAL.add('libx264');
       // Bitrate
       if(options.bitrate instanceof String){
-         cmd += ' -b:v ' + options.bitrate;
+         cmdAL.add('-b:v');
+         cmdAL.add(options.bitrate);
       }
       else
       {
-         cmd += ' -b:v ' + options.bitrate[0];
+         cmdAL.add('-b:v');
+         cmdAL.add(options.bitrate[0]);
       }
       // Resolution
-      cmd += ' -s ' + options.width.toString() + "x" + options.height.toString();
+      cmdAL.add('-s');
+      cmdAL.add(options.width.toString() + "x" + options.height.toString());
       // other parameters
-      cmd += ' -f flv ';
+      cmdAL.add('-f');
+      cmdAL.add('flv');
       // Target video name
-      cmd += ' ' + targetVideoDir + '/' + 'video.flv';
-      return cmd;
+      cmdAL.add(targetVideoDir + '/' + 'video.flv');
+      return cmdAL;
    }
 
    /**
@@ -266,20 +330,28 @@ class MediaTranscodeClass
    * @return the ffmpeg encoding command 
    */
    def generateAudioEncodingCommand(audioPath, targetAudioDir, options, audioCodec = "libvorbis"){
-      def cmd = '';
+      ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
       if(audioCodec == "libvorbis"){
-         cmd = 'ffmpeg -i ' + audioPath + ' -c:a libvorbis';
+         cmdAL.add('ffmpeg');
+         cmdAL.add('-i');
+         cmdAL.add(audioPath);
+         cmdAL.add('-c:a');
+         cmdAL.add('libvorbis');
          // Bitrate
          def bitrate = (options.bitrate instanceof String) ? options.bitrate : options.bitrate[0];
-         cmd += ' -b:a ' + bitrate;
+         cmdAL.add('-b:a');
+         cmdAL.add(bitrate);
          // other parameters
-         cmd += ' -vn -f webm';
+         cmdAL.add('-vn');
+         cmdAL.add('-f');
+         cmdAL.add('webm');
          // Dash parameters
-         cmd += ' -dash 1';
+         cmdAL.add('-dash');
+         cmdAL.add('1');
          // Target video name
-         cmd += ' ' + targetAudioDir + '/' + 'audio_' + bitrate + '.webm';
+         cmdAL.add(targetAudioDir + '/' + 'audio_' + bitrate + '.webm');
       }
-      return cmd;
+      return cmdAL;
    }
   
    /**
