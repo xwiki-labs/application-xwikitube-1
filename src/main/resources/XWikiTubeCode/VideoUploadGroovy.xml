@@ -167,7 +167,7 @@ class VideoUploadClass
 
    /**
    * create a file from InputStream
-   * 
+   *
    * @param fileDir the directory containing the file
    * @param fileName the name of the file
    * @param inputStream the inputStream of the file
@@ -177,6 +177,25 @@ class VideoUploadClass
       File file = new File(fileDir, fileName);
       this.fileUtils.copyInputStreamToFile(inputStream, file);
       return this.checkFileExists(fileDir, fileName);
+   }
+
+   /**
+   * Create a temporary video transcoding directory
+   *
+   * @param fileName the name of the source file
+   * @return the File object corresponding to the directory.
+   */
+   def createVideoTranscodingDir(fileName) {
+      File videoDir;
+      if(!this.checkFileExists(userXWikiTubeDir, fileName)){
+        // Create the file
+        videoDir = new File(userXWikiTubeDir, fileName);
+      }
+      else
+      {
+         videoDir = new File(userXWikiTubeDir, fileName + "_" + new Date().getTime() + "_" + xwiki.generateRandomString(10));
+      }
+      return videoDir;
    }
 
    /**
@@ -193,23 +212,19 @@ class VideoUploadClass
       for(item in fileItems){
         if(item.getFieldName() == formFieldName){
             def fileName = item.getName().replaceAll("[^a-zA-Z0-9.-]", "_");
+            File videoDir = this.createVideoTranscodingDir(fileName);
             InputStream inputStream = item.getInputStream();
-            File videoDir;
-            if(!this.checkFileExists(userXWikiTubeDir, fileName)){
-               // Create the file
-               videoDir = new File(userXWikiTubeDir, fileName);
-            }
-            else
-            {
-               videoDir = new File(userXWikiTubeDir, fileName + "_" + new Date().getTime() + "_" + xwiki.generateRandomString(10));
-            }
             if (!videoDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
             rep["ret"] = this.createFileFromInputStream(videoDir.getPath(), fileName, inputStream);
             def filePath = this.fileNameUtils.concat(videoDir.getPath(), fileName);
             rep["video"] = this.getVideoInfo(filePath);
             rep["video"]["original"] = 1;
             // Create an XWikiTube entry for the uploaded video
-            rep["video"]["videoDocRef"] = this.createVideoEntry(rep["video"], targetDocRef);
+            try{
+               rep["video"]["videoDocRef"] = this.createVideoEntry(rep["video"], targetDocRef);
+            }
+            catch(Exception e){
+            }
             this.attachFileToDoc(rep["video"]["videoDocRef"], rep["video"]["name"], filePath);
         }
       }
@@ -297,13 +312,73 @@ class VideoUploadClass
                   def video = this.getVideoInfo(file.getPath());
                   // Attach MediaClass object on to video document that describe the video
                   this.attachFileToDoc(videoDocRef, file.getName(), file.getPath());
-                  if(!file.getName().contains("audio") &amp;&amp; !file.getName().contains("manifest") &amp;&amp; file.getName() != "video.flv"){
-                     this.createVideoEntry(video, videoDocRef);
+                  if(file.getName() != "audio_128k.webm" &amp;&amp; file.getName() != "manifest.mpd" &amp;&amp; file.getName() != "video.flv"){
+                     try{
+                        this.createVideoEntry(video, videoDocRef);
+                     }
+                     catch(Exception e){
+                     }
                   }
                }
             }
          }
       }
+    }
+
+   /**
+   * Encode attachment video
+   * @param videoDocRef the video document reference of the source video
+   * @param videoName the video attachment name
+   * @param videoCodec the video codec will be used to encode the video
+   * @param settings encoding settings
+   */
+   def encodeAttachmentVideo(videoDocRef, videoName, videoCodec = "libvpx-vp9", settings = null){
+      def rep = ["ret": false, "error": ""];
+      if(videoDocRef != "" &amp;&amp; xwiki.exists(videoDocRef)){
+         def videoDoc = xwiki.getDocument(videoDocRef);
+         def att = videoDoc.getAttachment(videoName);
+         if(att){
+            def videoURL = xcontext.getURLFactory().createAttachmentURL(videoName, videoDoc.getSpace(), videoDoc.getName(), "download", "", xcontext.context).toString();
+            // Create a temporary directory that will contains the transcoding files
+            def fileName = videoName.replaceAll("[^a-zA-Z0-9.-]", "_");
+            File videoDir = this.createVideoTranscodingDir(fileName);
+            if (!videoDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
+            def dirPath = videoDir.getPath();
+            // Attach a vide object to the document that describes the original video
+            try{
+               this.createVideoEntry(this.getVideoInfo(videoURL, videoName, true), videoDocRef);
+            }
+            catch(Exception e){
+            }
+            this.mediaTranscoder.encodeVideo(videoURL, dirPath, videoCodec, settings);
+            // Attach generated videos to the document document
+            def files = this.getDirectoryFiles(dirPath);
+            for(file in files){
+               if(file.getName() != videoName){
+                  def video = this.getVideoInfo(file.getPath());
+                  // Attach MediaClass object on to video document that describe the video
+                  this.attachFileToDoc(videoDocRef, file.getName(), file.getPath());
+                  if(file.getName() != "audio_128k.webm" &amp;&amp; file.getName() != "manifest.mpd" &amp;&amp; file.getName() != "video.flv"){
+                     try{
+                        this.createVideoEntry(video, videoDocRef);
+                     }
+                     catch(Exception e){
+                     }
+                  }
+               }
+            }
+            rep.ret = true;
+         }
+         else
+         {
+            rep.error = "attachment_not_found!";
+         }
+      }
+      else
+      {
+         rep.error = "document_not_found!";
+      }
+      return rep;
     }
 
    /**
@@ -371,18 +446,26 @@ class VideoUploadClass
    * @param videoPath the file of the video
    * @return the video information
    */
-   def getVideoInfo(videoPath){
+   def getVideoInfo(videoPath, videoName = "", isURL = false){
       def rep = [:];
-      if(this.checkFileExists(videoPath)){
+      if(isURL || (!isURL &amp;&amp; this.checkFileExists(videoPath))){
          rep["path"] = videoPath;
-         rep["dirPath"] = '/' + this.fileNameUtils.getPath(rep["path"]);
-         rep["name"] = this.fileNameUtils.getName(rep["path"]);
-         rep["extension"]  = this.fileNameUtils.getExtension(rep["name"]);
-         File videoFile = new File(videoPath);
-         rep["size"] = this.fileUtils.sizeOf(videoFile);
-         rep["sizeMB"] = (rep["size"]/(1000*1000)).toString();
-         MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
-         rep["mimeType"] = mimeTypesMap.getContentType(videoFile);
+         rep["dirPath"] = isURL ? "" : '/' + this.fileNameUtils.getPath(rep["path"]);
+         rep["name"] = isURL ? videoName : this.fileNameUtils.getName(rep["path"]);
+         rep["extension"]  = isURL ? "" : this.fileNameUtils.getExtension(rep["name"]);
+         if(!isURL){
+            File videoFile = new File(videoPath);
+            rep["size"] = this.fileUtils.sizeOf(videoFile);
+            rep["sizeMB"] = (rep["size"]/(1000*1000)).toString();
+            MimetypesFileTypeMap mimeTypesMap = new MimetypesFileTypeMap();
+            rep["mimeType"] = mimeTypesMap.getContentType(videoFile);
+         }
+         else
+         {
+            rep["size"] = this.mediaTranscoder.getVideoSize(videoPath);
+            rep["sizeMB"] = this.mediaTranscoder.getVideoSize(videoPath, "MB");
+            rep["mimeType"] = "";//TODO
+         }
          // Get the video resolution and duration
          rep["resolution"] = this.mediaTranscoder.getVideoResolution(videoPath,'s');
          rep["arrayResolution"] = this.mediaTranscoder.getVideoResolution(videoPath);
