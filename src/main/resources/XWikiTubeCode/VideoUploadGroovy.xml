@@ -220,11 +220,7 @@ class VideoUploadClass
             rep["video"] = this.getVideoInfo(filePath);
             rep["video"]["original"] = 1;
             // Create an XWikiTube entry for the uploaded video
-            try{
-               rep["video"]["videoDocRef"] = this.createVideoEntry(rep["video"], targetDocRef);
-            }
-            catch(Exception e){
-            }
+            rep["video"]["videoDocRef"] = this.createVideoEntry(rep["video"], targetDocRef);
             this.attachFileToDoc(rep["video"]["videoDocRef"], rep["video"]["name"], filePath);
         }
       }
@@ -313,11 +309,7 @@ class VideoUploadClass
                   // Attach MediaClass object on to video document that describe the video
                   this.attachFileToDoc(videoDocRef, file.getName(), file.getPath());
                   if(file.getName() != "audio_128k.webm" &amp;&amp; file.getName() != "manifest.mpd" &amp;&amp; file.getName() != "video.flv"){
-                     try{
-                        this.createVideoEntry(video, videoDocRef);
-                     }
-                     catch(Exception e){
-                     }
+                     this.createVideoEntry(video, videoDocRef);
                   }
                }
             }
@@ -345,11 +337,7 @@ class VideoUploadClass
             if (!videoDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
             def dirPath = videoDir.getPath();
             // Attach a vide object to the document that describes the original video
-            try{
-               this.createVideoEntry(this.getVideoInfo(videoURL, videoName, true), videoDocRef);
-            }
-            catch(Exception e){
-            }
+            this.createVideoEntry(this.getVideoInfo(videoURL, videoName, true), videoDocRef);
             this.mediaTranscoder.encodeVideo(videoURL, dirPath, videoCodec, settings);
             // Attach generated videos to the document document
             def files = this.getDirectoryFiles(dirPath);
@@ -359,11 +347,7 @@ class VideoUploadClass
                   // Attach MediaClass object on to video document that describe the video
                   this.attachFileToDoc(videoDocRef, file.getName(), file.getPath());
                   if(file.getName() != "audio_128k.webm" &amp;&amp; file.getName() != "manifest.mpd" &amp;&amp; file.getName() != "video.flv"){
-                     try{
-                        this.createVideoEntry(video, videoDocRef);
-                     }
-                     catch(Exception e){
-                     }
+                     this.createVideoEntry(video, videoDocRef);
                   }
                }
             }
