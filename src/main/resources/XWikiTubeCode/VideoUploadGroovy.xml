@@ -49,6 +49,7 @@
 
 import java.io.File;
 import java.io.FileOutputStream;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.FileUtils;
 import javax.activation.MimetypesFileTypeMap;
@@ -318,13 +319,13 @@ class VideoUploadClass
     }
 
    /**
-   * Encode attachment video
+   * Encode attachment video using URL
    * @param videoDocRef the video document reference of the source video
    * @param videoName the video attachment name
    * @param videoCodec the video codec will be used to encode the video
    * @param settings encoding settings
    */
-   def encodeAttachmentVideo(videoDocRef, videoName, videoCodec = "libvpx-vp9", settings = null){
+   def encodeAttachmentVideoUsingURL(videoDocRef, videoName, videoCodec = "libvpx-vp9", settings = null){
       def rep = ["ret": false, "error": ""];
       if(videoDocRef != "" &amp;&amp; xwiki.exists(videoDocRef)){
          def videoDoc = xwiki.getDocument(videoDocRef);
@@ -339,6 +340,56 @@ class VideoUploadClass
             // Attach a vide object to the document that describes the original video
             this.createVideoEntry(this.getVideoInfo(videoURL, videoName, true), videoDocRef);
             this.mediaTranscoder.encodeVideo(videoURL, dirPath, videoCodec, settings);
+            // Attach generated videos to the document document
+            def files = this.getDirectoryFiles(dirPath);
+            for(file in files){
+               if(file.getName() != videoName){
+                  def video = this.getVideoInfo(file.getPath());
+                  // Attach MediaClass object on to video document that describe the video
+                  this.attachFileToDoc(videoDocRef, file.getName(), file.getPath());
+                  if(file.getName() != "audio_128k.webm" &amp;&amp; file.getName() != "manifest.mpd" &amp;&amp; file.getName() != "video.flv"){
+                     this.createVideoEntry(video, videoDocRef);
+                  }
+               }
+            }
+            rep.ret = true;
+         }
+         else
+         {
+            rep.error = "attachment_not_found!";
+         }
+      }
+      else
+      {
+         rep.error = "document_not_found!";
+      }
+      return rep;
+    }
+
+   /**
+   * Encode attachment video
+   * @param videoDocRef the video document reference of the source video
+   * @param attName the video attachment name
+   * @param videoCodec the video codec will be used to encode the video
+   * @param settings encoding settings
+   */
+   def encodeAttachmentVideo(videoDocRef, attName, videoCodec = "libvpx-vp9", settings = null){
+      def rep = ["ret": false, "error": ""];
+      if(videoDocRef != "" &amp;&amp; xwiki.exists(videoDocRef)){
+         def videoDoc = xwiki.getDocument(videoDocRef);
+         def att = videoDoc.getAttachment(attName);
+         if(att){
+            // Create a temporary directory that will contains the transcoding files
+            def videoName = attName.replaceAll("[^a-zA-Z0-9.-]", "_");
+            File videoDir = this.createVideoTranscodingDir(videoName);
+            if (!videoDir.mkdir()) { throw new RuntimeException("failed to make directory"); }
+            def dirPath = videoDir.getPath();
+            // Copy the attachment video to the video temp dir
+            def videoPath = this.fileNameUtils.concat(dirPath, videoName);
+            IOUtils.copy(videoDoc.getAttachment(attName).getContentInputStream(), new FileOutputStream(videoPath) );
+            // Attach a video object to the document that describes the original video
+            this.createVideoEntry(this.getVideoInfo(videoPath), videoDocRef);
+            this.mediaTranscoder.encodeVideo(videoPath, dirPath, videoCodec, settings);
             // Attach generated videos to the document document
             def files = this.getDirectoryFiles(dirPath);
             for(file in files){
