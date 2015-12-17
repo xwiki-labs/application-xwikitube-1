@@ -42,7 +42,7 @@
   <minorEdit>false</minorEdit>
   <syntaxId>xwiki/2.1</syntaxId>
   <hidden>false</hidden>
-  <content>{{velocity}}
+  <content>{{velocity output="false"}}
 #* General XWikiTube utilities. *#
 
 #**
@@ -60,6 +60,26 @@
       * Resolution(px): **$!video.resolution**
       * Bitrate(kbps): **$!video.bitrate**
    #end
+#end
+
+#**
+* Display video encode form
+* @param $videoAttachmens list of video attachments
+*#
+#macro(displayVideoEncodeForm $videoAttachmens)
+   &lt;div id="video-encode-blk"&gt;
+      &lt;label&gt;Select the video to be encoded&lt;/label&gt;
+      &lt;select id="video-select"&gt;
+      #foreach($att in $videoAttachmens)
+         #if($att.getMimeType().contains("video"))
+            &lt;option value="$att.getFilename()"&gt;$att.getFilename()&lt;/option&gt;
+         #end
+      #end
+      &lt;/select&gt;
+      &lt;input type="button" value="Encode" id="encode-video-btn" class="btn btn-primary"/&gt;
+      &lt;span id="video-encoding-progress" style="display: none;"&gt;Encoding ...&lt;/span&gt;
+      &lt;div id="video-encode-result"&gt;&lt;/div&gt;
+   &lt;/div&gt;
 #end
 {{/velocity}}</content>
 </xwikidoc>

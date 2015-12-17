@@ -124,7 +124,7 @@
     <property>
       <code>#set($encodeVideoURL = $xwiki.getURL("XWikiTubeCode.VideoUpload", "view", "xpage=plain&amp;action=encodeVideo"))
 var encodeVideoURL = "$encodeVideoURL";
-
+var messages = {encode_succes: "The encoding process has been performed successfully."};
 // Configure require.js to use Bootstrap FileStyle (https://github.com/markusslima/bootstrap-filestyle)
 require.config({
    "paths": { "bootstrap-filestyle": "$services.webjars.url('bootstrap-filestyle/1.2.1/src/bootstrap-filestyle.min.js')" }
@@ -197,10 +197,16 @@ $(function(){
         $.post(encodeVideoURL, {videoDocRef: videoDocRef, videoName: videoName})
         .done(function(rep){
            $("#video-encoding-progress").hide();
-           $("#video-encode-result").html("&lt;div style='color: green;'&gt;Succes&lt;/div&gt;" + rep);
+           if(rep == ""){
+              $("#video-encode-result").html("&lt;div class='box successmessage'&gt;" + messages.encode_succes + " &lt;a href='javascript: location.reload(true)'&gt;View the video&lt;/a&gt;&lt;/div&gt;");
+           }
+           else
+           {
+              $("#video-encode-result").html(rep);
+           }
         }).fail(function(xhr, textStatus, errorThrown) {
            $("#video-encoding-progress").hide();
-           $("#video-encode-result").html("&lt;div class='xwikirenderingerror'&gt;" + xhr.responseText + "&lt;/div&gt;");
+           $("#video-encode-result").html("&lt;div class='xwikirenderingerror'&gt;&lt;h1&gt;" + textStatus + ": " + xhr.status + "&lt;/h1&gt;" + xhr.responseText + "&lt;/div&gt;");
         });
      });
   });
@@ -467,7 +473,9 @@ $(function(){
     <className>XWiki.WikiMacroClass</className>
     <guid>e703219d-228a-4529-af05-32062946ff4b</guid>
     <property>
-      <code>{{velocity}}
+      <code>{{include reference="XWikiTubeCode.Macros"/}}
+
+{{velocity}}
 #set($discard = $xwiki.jsx.use("XWikiTubeCode.VideoUpload"))
 #set($discard = $xwiki.ssx.use("XWikiTubeCode.VideoUpload"))
 ###set($actionURL = $xwiki.getURL("XWikiTubeCode.VideoUpload", "view", "xpage=plain&amp;action=uploadVideo"))
@@ -477,7 +485,16 @@ $(function(){
 #set($discard = $videoUploader.init($xwiki, $xcontext, $services))
 ## Check FFmpeg installation
 #set($ffmpeg = $videoUploader.mediaTranscoder.checkFFmpeg())
+##check if there videos already attached the to document
+#set($attachments = $doc.getAttachmentList())
+#set($videoAttachments = [])
+#foreach($att in $attachments)
+   #if($att.getMimeType().contains("video"))
+      #set($discard = $videoAttachments.add($att))
+   #end
+#end
 {{html}}
+#if($videoAttachments.size() == 0)
 &lt;form action="$actionURL" id="video-upload-form" enctype="multipart/form-data" method="post"&gt;
 &lt;div class="video-uploader-container"&gt;
    &lt;input type="file" id="videoInput" name="filepath" class="upload-video-input"/&gt;
@@ -495,6 +512,9 @@ $(function(){
 &lt;/div&gt;
 &lt;/form&gt;
 {{/html}}
+#else
+   #displayVideoEncodeForm($videoAttachments){{/html}}
+#end
 {{/velocity}}</code>
     </property>
     <property>
@@ -705,21 +725,13 @@ If this parameter is not mentioned when a document is created for each video.</d
          #set($videoDocRef = $request.videoDocRef)
          #set($videoDoc = $xwiki.getDocument($videoDocRef))
          #set($attachments = $videoDoc.getAttachmentList())
-         {{html}}
-            &lt;div id="video-encode-blk"&gt;
-            &lt;label&gt;Select the video to be encoded&lt;/label&gt;
-            &lt;select id="video-select"&gt;
-            #foreach($att in $attachments)
-               #if($att.getMimeType().contains("video"))
-                  &lt;option value="$att.getFilename()"&gt;$att.getFilename()&lt;/option&gt;
-               #end
+         #set($videoAttachments = [])
+         #foreach($att in $attachments)
+            #if($att.getMimeType().contains("video"))
+               #set($discard = $videoAttachments.add($att))
             #end
-            &lt;/select&gt;
-            &lt;input type="button" value="Encode" id="encode-video-btn" class="btn btn-primary"/&gt;
-            &lt;span id="video-encoding-progress" style="display: none;"&gt;Encoding ...&lt;/span&gt;
-            &lt;div id="video-encode-result"&gt;&lt;/div&gt;
-            &lt;/div&gt;
-         {{/html}}
+         #end
+         {{html}}#displayVideoEncodeForm($videoAttachments){{/html}}
       #end
    #end
 #end
