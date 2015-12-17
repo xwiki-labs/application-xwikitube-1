@@ -388,7 +388,9 @@ class VideoUploadClass
             def videoPath = this.fileNameUtils.concat(dirPath, videoName);
             IOUtils.copy(videoDoc.getAttachment(attName).getContentInputStream(), new FileOutputStream(videoPath) );
             // Attach a video object to the document that describes the original video
-            this.createVideoEntry(this.getVideoInfo(videoPath), videoDocRef);
+            def originalVideoInfo = this.getVideoInfo(videoPath);
+            originalVideoInfo["original"] = 1;
+            this.createVideoEntry(originalVideoInfo, videoDocRef);
             this.mediaTranscoder.encodeVideo(videoPath, dirPath, videoCodec, settings);
             // Attach generated videos to the document document
             def files = this.getDirectoryFiles(dirPath);

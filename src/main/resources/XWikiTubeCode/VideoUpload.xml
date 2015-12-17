@@ -122,7 +122,10 @@
       <cache>long</cache>
     </property>
     <property>
-      <code>// Configure require.js to use Bootstrap FileStyle (https://github.com/markusslima/bootstrap-filestyle)
+      <code>#set($encodeVideoURL = $xwiki.getURL("XWikiTubeCode.VideoUpload", "view", "xpage=plain&amp;action=encodeVideo"))
+var encodeVideoURL = "$encodeVideoURL";
+
+// Configure require.js to use Bootstrap FileStyle (https://github.com/markusslima/bootstrap-filestyle)
 require.config({
    "paths": { "bootstrap-filestyle": "$services.webjars.url('bootstrap-filestyle/1.2.1/src/bootstrap-filestyle.min.js')" }
 });
@@ -132,7 +135,8 @@ var fileUploader;
 if(targetInput) {
   fileUploader = new XWiki.FileUploader(targetInput, {
     autoUpload: true,
-    progressAutohide: false
+    progressAutohide: false,
+    fileFilter: /video\/.*/
   });
 }
 
@@ -167,6 +171,39 @@ $(function(){
        fileUploader.formData.action = formAction;
     }
   }
+   
+  // Get the name of the attachment
+  $("#videoInput").change(function(event){
+     var fullPath = $(this).val();
+     var startIndex = (fullPath.indexOf('\\') &gt;= 0 ? fullPath.lastIndexOf('\\') : fullPath.lastIndexOf('/'));
+     var filename = fullPath.substring(startIndex);
+     if (filename.indexOf('\\') === 0 || filename.indexOf('/') === 0) {
+	filename = filename.substring(1);
+     }
+     var xredirectURL = $("#video-upload-form #video-xredirect").val();
+     xredirectURL = xredirectURL + "&amp;videoName=" + filename;
+     $("#video-upload-form #video-xredirect").val(xredirectURL);
+     fileUploader.options.responseURL = xredirectURL;
+     fileUploader.formData.xredirect = xredirectURL;
+  });
+
+  // Initialize encode button
+  $("body").on("click", "#encode-video-btn", function(event){
+     require(['xwiki-meta'], function (xm) {
+        var videoName = $("#video-select").val();
+        var videoDocRef = xm.document;
+        $("#video-encoding-progress").show();
+        $("#encode-video-btn").attr("disabled", true);
+        $.post(encodeVideoURL, {videoDocRef: videoDocRef, videoName: videoName})
+        .done(function(rep){
+           $("#video-encoding-progress").hide();
+           $("#video-encode-result").html("&lt;div style='color: green;'&gt;Succes&lt;/div&gt;" + rep);
+        }).fail(function(xhr, textStatus, errorThrown) {
+           $("#video-encoding-progress").hide();
+           $("#video-encode-result").html("&lt;div class='xwikirenderingerror'&gt;" + xhr.responseText + "&lt;/div&gt;");
+        });
+     });
+  });
 });
 });</code>
     </property>
@@ -433,15 +470,19 @@ $(function(){
       <code>{{velocity}}
 #set($discard = $xwiki.jsx.use("XWikiTubeCode.VideoUpload"))
 #set($discard = $xwiki.ssx.use("XWikiTubeCode.VideoUpload"))
-#set($actionURL = $xwiki.getURL("XWikiTubeCode.VideoUpload", "view", "xpage=plain&amp;action=uploadVideo"))
+###set($actionURL = $xwiki.getURL("XWikiTubeCode.VideoUpload", "view", "xpage=plain&amp;action=uploadVideo"))
+#set($actionURL = $doc.getURL("upload"))
+#set($xredirectURL = $xwiki.getURL("XWikiTubeCode.VideoUpload", "view", "xpage=plain&amp;action=transcodeVideo&amp;videoDocRef=${doc.getDocumentReference()}"))
 #set($videoUploader = $xwiki.parseGroovyFromPage("XWikiTubeCode.VideoUploadGroovy"))
 #set($discard = $videoUploader.init($xwiki, $xcontext, $services))
 ## Check FFmpeg installation
 #set($ffmpeg = $videoUploader.mediaTranscoder.checkFFmpeg())
 {{html}}
-&lt;form action="$actionURL"&gt;
+&lt;form action="$actionURL" id="video-upload-form" enctype="multipart/form-data" method="post"&gt;
 &lt;div class="video-uploader-container"&gt;
-   &lt;input type="file" id="videoInput" name="videoInput" class="upload-video-input"/&gt;
+   &lt;input type="file" id="videoInput" name="filepath" class="upload-video-input"/&gt;
+   &lt;input type="hidden" name="form_token" value="$services.csrf.getToken()" /&gt;
+   &lt;input type="hidden" name="xredirect" value="$xredirectURL" id="video-xredirect"/&gt;
    #if ("$!xcontext.macro.params.targetDoc" != '' &amp;&amp; $xwiki.exists($xcontext.macro.params.targetDoc))
       &lt;input type="hidden" id="videoTargetDoc" value="$xcontext.macro.params.targetDoc"/&gt;
    #end
@@ -556,6 +597,7 @@ If this parameter is not mentioned when a document is created for each video.</d
 #* Upload and transcode files *#
 #set($videoUploader = $xwiki.parseGroovyFromPage("XWikiTubeCode.VideoUploadGroovy"))
 #set($discard = $videoUploader.init($xwiki, $xcontext, $services))
+#set($discard = $xcontext.put("videoUploader", $videoUploader))
 #set($action = $request.action)
 
 #if ("$!action" != '')
@@ -658,8 +700,42 @@ If this parameter is not mentioned when a document is created for each video.</d
          #set($rep = $videoUploader.deleteMedia($mediaDocRef))
          $rep
       #end
+   #elseif($action == 'transcodeVideo')
+      #if("$!request.videoDocRef" != "" &amp;&amp; $xwiki.exists($request.videoDocRef))
+         #set($videoDocRef = $request.videoDocRef)
+         #set($videoDoc = $xwiki.getDocument($videoDocRef))
+         #set($attachments = $videoDoc.getAttachmentList())
+         {{html}}
+            &lt;div id="video-encode-blk"&gt;
+            &lt;label&gt;Select the video to be encoded&lt;/label&gt;
+            &lt;select id="video-select"&gt;
+            #foreach($att in $attachments)
+               #if($att.getMimeType().contains("video"))
+                  &lt;option value="$att.getFilename()"&gt;$att.getFilename()&lt;/option&gt;
+               #end
+            #end
+            &lt;/select&gt;
+            &lt;input type="button" value="Encode" id="encode-video-btn" class="btn btn-primary"/&gt;
+            &lt;span id="video-encoding-progress" style="display: none;"&gt;Encoding ...&lt;/span&gt;
+            &lt;div id="video-encode-result"&gt;&lt;/div&gt;
+            &lt;/div&gt;
+         {{/html}}
+      #end
    #end
 #end
+{{/velocity}}
 
-{{/velocity}}</content>
+{{groovy}}
+if(request.action == "encodeVideo" &amp;&amp; request.videoDocRef &amp;&amp; xwiki.exists(request.videoDocRef) &amp;&amp; request.videoName){
+   def videoDocRef = request.videoDocRef;
+   def videoName = request.videoName;
+   def videoUploader = xcontext.get("videoUploader");
+   try {
+      videoUploader.encodeAttachmentVideo(videoDocRef, videoName);
+   } catch(Exception e) {
+      e.printStackTrace();
+      throw new RuntimeException(e.getMessage());
+   }
+}
+{{/groovy}}</content>
 </xwikidoc>

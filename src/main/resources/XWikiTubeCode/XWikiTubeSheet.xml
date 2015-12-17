@@ -388,7 +388,7 @@
        &lt;div class="video-blk"&gt;
        &lt;br/&gt;
 
-       {{videoupload targetDoc="$doc.getDocumentReference()"/}}
+       {{videoupload/}}
 
        &lt;/div&gt;
        #else
