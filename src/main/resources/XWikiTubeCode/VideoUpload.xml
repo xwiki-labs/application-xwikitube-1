@@ -122,9 +122,9 @@
       <cache>long</cache>
     </property>
     <property>
-      <code>#set($encodeVideoURL = $xwiki.getURL("XWikiTubeCode.VideoUpload", "view", "xpage=plain&amp;action=encodeVideo"))
+      <code>#set($encodeVideoURL = $xwiki.getURL("XWikiTubeCode.VideoUpload", "view", "xpage=plain&amp;outputSyntax=plain&amp;action=encodeVideo"))
 var encodeVideoURL = "$encodeVideoURL";
-var messages = {encode_succes: "The encoding process has been performed successfully."};
+var messages = {encode_succes: "The encoding process has been performed successfully.", encode_error: "An error occurred during the video encoding."};
 // Configure require.js to use Bootstrap FileStyle (https://github.com/markusslima/bootstrap-filestyle)
 require.config({
    "paths": { "bootstrap-filestyle": "$services.webjars.url('bootstrap-filestyle/1.2.1/src/bootstrap-filestyle.min.js')" }
@@ -194,11 +194,22 @@ $(function(){
         var videoDocRef = xm.document;
         $("#video-encoding-progress").show();
         $("#encode-video-btn").attr("disabled", true);
-        $.post(encodeVideoURL, {videoDocRef: videoDocRef, videoName: videoName})
+        $.ajax({
+           url: encodeVideoURL, 
+           method: "POST",
+           dataType: "json",
+           data: ({videoDocRef: videoDocRef, videoName: videoName})
+        })
         .done(function(rep){
            $("#video-encoding-progress").hide();
-           if(rep == ""){
-              $("#video-encode-result").html("&lt;div class='box successmessage'&gt;" + messages.encode_succes + " &lt;a href='javascript: location.reload(true)'&gt;View the video&lt;/a&gt;&lt;/div&gt;");
+           if(rep.encoding){
+              if(rep.encoding.ret){
+                 $("#video-encode-result").html("&lt;div class='box successmessage'&gt;" + messages.encode_succes + " &lt;a href='javascript: location.reload(true)'&gt;View the video&lt;/a&gt;&lt;/div&gt;");
+              }
+              else
+              {
+                 $("#video-encode-result").html("&lt;div class='xwikirenderingerror'&gt;&lt;h1&gt;" + messages.encode_error + "&lt;/h1&gt;" + rep.encoding.error + "&lt;/div&gt;");
+              }
            }
            else
            {
@@ -206,7 +217,7 @@ $(function(){
            }
         }).fail(function(xhr, textStatus, errorThrown) {
            $("#video-encoding-progress").hide();
-           $("#video-encode-result").html("&lt;div class='xwikirenderingerror'&gt;&lt;h1&gt;" + textStatus + ": " + xhr.status + "&lt;/h1&gt;" + xhr.responseText + "&lt;/div&gt;");
+           $("#video-encode-result").html("&lt;div class='xwikirenderingerror'&gt;&lt;h1&gt;" + textStatus + ": " + xhr.status + "&lt;/h1&gt;" + errorThrown + "&lt;/div&gt;");
         });
      });
   });
@@ -743,7 +754,14 @@ if(request.action == "encodeVideo" &amp;&amp; request.videoDocRef &amp;&amp; xwi
    def videoName = request.videoName;
    def videoUploader = xcontext.get("videoUploader");
    try {
-      videoUploader.encodeAttachmentVideo(videoDocRef, videoName);
+      def rep = videoUploader.encodeAttachmentVideo(videoDocRef, videoName);
+      if(rep.ret){
+         print '{"encoding": {"ret": ' + rep.ret + '}}';
+      }
+      else
+      {
+         print '{"encoding": {"ret": ' + rep.ret + ', "error": "' + rep.error + '"}}';
+      }
    } catch(Exception e) {
       e.printStackTrace();
       throw new RuntimeException(e.getMessage());
