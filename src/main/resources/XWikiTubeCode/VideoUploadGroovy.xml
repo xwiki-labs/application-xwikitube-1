@@ -391,32 +391,65 @@ class VideoUploadClass
             def originalVideoInfo = this.getVideoInfo(videoPath);
             originalVideoInfo["original"] = 1;
             this.createVideoEntry(originalVideoInfo, videoDocRef);
-            this.mediaTranscoder.encodeVideo(videoPath, dirPath, videoCodec, settings);
-            // Attach generated videos to the document document
-            def files = this.getDirectoryFiles(dirPath);
-            for(file in files){
-               if(file.getName() != videoName){
-                  def video = this.getVideoInfo(file.getPath());
-                  // Attach MediaClass object on to video document that describe the video
-                  this.attachFileToDoc(videoDocRef, file.getName(), file.getPath());
-                  if(file.getName() != "audio_128k.webm" &amp;&amp; file.getName() != "manifest.mpd" &amp;&amp; file.getName() != "video.flv"){
-                     this.createVideoEntry(video, videoDocRef);
-                  }
-               }
+            // Generate all ffmpeg encoding commands
+            def commands = this.mediaTranscoder.generateEncodingCommands(videoPath, dirPath, videoCodec, settings);
+            for(cmd in commands){
+               // Attach a command object to the document
+                def cmdID = videoDoc.createNewObject("XWikiTubeCode.CommandClass");
+                def cmdObj = videoDoc.getObject("XWikiTubeCode.CommandClass", cmdID);
+                cmdObj.set("cmd", cmd.command);
+                cmdObj.set("workDir", cmd.workDir);
+                cmdObj.set("outputFile", cmd.outputFile);
+                cmdObj.set("status", "waiting");
+                cmdObj.set("duration", originalVideoInfo.duration);// Video duration converted to microseconds
+                videoDoc.save();
             }
             rep.ret = true;
          }
          else
          {
-            rep.error = "attachment_not_found!";
+            rep.error = "attachment_not_found";
          }
       }
       else
       {
-         rep.error = "document_not_found!";
+         rep.error = "document_not_found";
       }
       return rep;
     }
+
+   /**
+   * Attach encoding files to XWiki document
+   */
+   def attachEncodingFilesToDoc(videoDir, videoDocRef, videoName){
+      def rep = true;
+      if(xwiki.exists(videoDocRef) &amp;&amp; this.checkDirExists(videoDir)){
+         // Attach generated videos to the document document
+         def files = this.getDirectoryFiles(videoDir);
+         for(file in files){
+            if(file.getName() != videoName &amp;&amp; !file.getName().endsWith(".txt")){
+               def video = this.getVideoInfo(file.getPath());
+               // Attach MediaClass object on to video document that describe the video
+               this.attachFileToDoc(videoDocRef, file.getName(), file.getPath());
+               if(file.getName() != "audio_128k.webm" &amp;&amp; file.getName() != "manifest.mpd" &amp;&amp; file.getName() != "video.flv"){
+                  this.createVideoEntry(video, videoDocRef);
+               }
+            }
+         }
+         // Update the video object on the document
+         def videoDoc = xwiki.getDocument(videoDocRef);
+         def originalVideoObj = videoDoc.getObject(mediaClass, "original", "1");
+         if(originalVideoObj){
+            originalVideoObj.set("encoded", 1);
+            videoDoc.save();
+         }
+      }
+      else
+      {
+         rep = false;
+      }
+      return rep;
+   }
 
    /**
    * Get directory files
@@ -548,6 +581,39 @@ class VideoUploadClass
          }
       }
       return rep;
+   }
+
+   /**
+   * Check encoding progress
+   *
+   * @param outputFilePath the path of the file containing the output result of a command
+   * @param duration the duration of the original video, used to compute the progress of video/audio streams
+   * @return a map (status, currentTime, progress)
+   */
+   def checkEncodingProgress(outputFilePath, duration){
+      if(this.checkFileExists(outputFilePath)){
+         def durationMS = (duration * 1000000).toLong(); // Duration in Micro S
+         def status = "";
+         def currentTime = "";
+         File f = new File(outputFilePath);
+         def it = this.fileUtils.lineIterator(f);
+         while (it.hasNext()) {
+            String line = it.nextLine();
+            if(line.contains("progress=")){
+               status = line.replace("progress=", "");
+            }
+            else if(line.contains("out_time_ms=")){
+               currentTime = line.replace("out_time_ms=", "");
+            }
+         }
+         def currentTimeMS = currentTime.toLong();
+         def progress = Math.round((currentTimeMS/durationMS) * 100);
+         return ["status": status, "currentTime": currentTimeMS, "progress": progress];
+       }
+      else
+      {
+         return ["status": "output_file_not_found"];
+      }
    }
 }</content>
 </xwikidoc>

@@ -384,12 +384,23 @@
   &lt;div class="tab-content"&gt;
     &lt;div role="tabpanel" class="tab-pane active" id="basicinfo"&gt;
     #if ($xcontext.action == "view")
-       #if(!$originalMediaObj)
+       #if(!$originalMediaObj || ($originalMediaObj &amp;&amp; $originalMediaObj.getValue("encoded") != 1))
        &lt;div class="video-blk"&gt;
        &lt;br/&gt;
+       #if(!$originalMediaObj)
 
        {{videoupload/}}
 
+       #else
+       #set($discard = $xwiki.ssx.use("XWikiTubeCode.VideoUpload"))
+       #set($discard = $xwiki.jsx.use("XWikiTubeCode.VideoUpload"))
+       &lt;div id="encoding-progress"&gt;
+          Displaying the encoding progress ...
+          &lt;input type="hidden" id="encodingInProgress" value="1"/&gt;
+          &lt;input type="hidden" id="videoDocRef" value="$doc.documentReference"/&gt;
+          &lt;input type="hidden" id="videoName" value="$originalMediaObj.getValue('name')"/&gt;
+       &lt;/div&gt;
+       #end
        &lt;/div&gt;
        #else
           &lt;div class="row video-blk"&gt;

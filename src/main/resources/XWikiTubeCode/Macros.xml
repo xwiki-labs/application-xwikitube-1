@@ -68,6 +68,7 @@
 *#
 #macro(displayVideoEncodeForm $videoAttachmens)
    &lt;div id="video-encode-blk"&gt;
+      &lt;div id="select-video-blk"&gt;
       &lt;label&gt;Select the video to be encoded&lt;/label&gt;
       &lt;select id="video-select"&gt;
       #foreach($att in $videoAttachmens)
@@ -77,8 +78,8 @@
       #end
       &lt;/select&gt;
       &lt;input type="button" value="Encode" id="encode-video-btn" class="btn btn-primary"/&gt;
-      &lt;span id="video-encoding-progress" style="display: none;"&gt;Encoding ...&lt;/span&gt;
-      &lt;div id="video-encode-result"&gt;&lt;/div&gt;
+      &lt;/div&gt;
+      &lt;div id="encoding-progress" style="display: none;"&gt;Initialization ...&lt;/div&gt;
    &lt;/div&gt;
 #end
 {{/velocity}}</content>

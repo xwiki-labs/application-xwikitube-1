@@ -49,6 +49,7 @@ import java.io.FileOutputStream;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.FileUtils;
 import java.util.ArrayList;
+
 class MediaTranscodeClass
 {
    def xwiki;
@@ -245,6 +246,10 @@ class MediaTranscodeClass
       ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
       if(videoCodec == "libvpx-vp9"){
          cmdAL.add('ffmpeg');
+         cmdAL.add('-y');
+         cmdAL.add('-progress');
+         def outputFilename = options.resolution + "_output" + ".txt";
+         cmdAL.add(targetVideoDir + '/' + outputFilename);
          cmdAL.add('-i');
          cmdAL.add(videoPath);
          cmdAL.add('-c:v');
@@ -282,8 +287,10 @@ class MediaTranscodeClass
          cmdAL.add('1');
          // Target video name
          cmdAL.add(targetVideoDir + '/' + 'video_' + options.resolution + '_' + bitrate + '.webm');
+         // Run command in background
+         cmdAL.add("&gt; /dev/null 2&gt;&amp;1 &lt; /dev/null &amp;");
       }
-      return cmdAL;
+      return this.implodeArrayList(cmdAL, " ");
    }
 
    /**
@@ -296,6 +303,10 @@ class MediaTranscodeClass
    def generateFlvEncodingCommand(videoPath, targetVideoDir, options){
       ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
       cmdAL.add('ffmpeg');
+      cmdAL.add('-y');
+      cmdAL.add('-progress');
+      def outputFilename = "flv_output.txt";
+      cmdAL.add(targetVideoDir + '/' + outputFilename);
       cmdAL.add('-i');
       cmdAL.add(videoPath);
       cmdAL.add('-c:v');
@@ -318,7 +329,9 @@ class MediaTranscodeClass
       cmdAL.add('flv');
       // Target video name
       cmdAL.add(targetVideoDir + '/' + 'video.flv');
-      return cmdAL;
+      // Run command in background
+      cmdAL.add("&gt; /dev/null 2&gt;&amp;1 &lt; /dev/null &amp;");
+      return this.implodeArrayList(cmdAL, " ");
    }
 
    /**
@@ -333,6 +346,10 @@ class MediaTranscodeClass
       ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
       if(audioCodec == "libvorbis"){
          cmdAL.add('ffmpeg');
+         cmdAL.add('-y');
+         cmdAL.add('-progress');
+         def outputFilename = "audio_output.txt";
+         cmdAL.add(targetAudioDir + '/' + outputFilename);
          cmdAL.add('-i');
          cmdAL.add(audioPath);
          cmdAL.add('-c:a');
@@ -350,8 +367,10 @@ class MediaTranscodeClass
          cmdAL.add('1');
          // Target video name
          cmdAL.add(targetAudioDir + '/' + 'audio_' + bitrate + '.webm');
+         // Run command in background
+         cmdAL.add("&gt; /dev/null 2&gt;&amp;1 &lt; /dev/null &amp;");
       }
-      return cmdAL;
+      return this.implodeArrayList(cmdAL, " ");
    }
   
    /**
@@ -396,6 +415,7 @@ class MediaTranscodeClass
          for(options in videoEncodingSettings){
             def cmd = generateVideoEncodingCommand(videoPath, targetVideoDir, options, videoCodec);
             runVideoEncoding(cmd);
+            def bitrate = (options.bitrate instanceof String) ? options.bitrate : options.bitrate[0] + '-' + options.bitrate[1];
          }
          // Generate audio stream
          def cmd = generateAudioEncodingCommand(videoPath, targetVideoDir, this.recommendedAudioEncodingSettings[0]);
@@ -405,8 +425,41 @@ class MediaTranscodeClass
          cmd = generateFlvEncodingCommand(videoPath, targetVideoDir, lowQualityOptions);
          runVideoEncoding(cmd);
          // Generate manifest.mpd file
-         def manifestPath = this.generateDASHManifest(targetVideoDir);
+         def manifestCmd = this.generateDASHManifestCommand(targetVideoDir);
+         runVideoEncoding(manifestCmd);
       }
+   }
+
+   /**
+   * Generate encoding commands
+   * @param videoPath the path of the video file in the filesystem
+   * @param targetVideoDir the target directory that will contains the encoded files
+   * @param videoCodec the codec that will be used to encode the source video
+   */
+   def generateEncodingCommands(videoPath, targetVideoDir, videoCodec="libvpx-vp9", videoEncodingSettings = null){
+      def commands = [];
+      if(videoEncodingSettings == null){
+         // Generate the list of options
+         videoEncodingSettings = this.getVideoEncodingSettingsList(videoPath);
+      }
+      // Generate videos streams commands
+      for(options in videoEncodingSettings){
+         def cmd = generateVideoEncodingCommand(videoPath, targetVideoDir, options, videoCodec);
+         def outputFilename = options.resolution + "_output" + ".txt";
+         commands.add(["command": cmd, "workDir": targetVideoDir, "outputFile": outputFilename]);
+      }
+      // Generate audio stream command
+      def cmd = generateAudioEncodingCommand(videoPath, targetVideoDir, this.recommendedAudioEncodingSettings[0]);
+      commands.add(["command": cmd, "workDir": targetVideoDir, "outputFile": "audio_output.txt"]);
+      // Generate the flv video with the lowest quality that will be played if the browser do not support MSE.
+      def lowQualityOptions = videoEncodingSettings[videoEncodingSettings.size() - 1];
+      cmd = generateFlvEncodingCommand(videoPath, targetVideoDir, lowQualityOptions);
+      commands.add(["command": cmd, "workDir": targetVideoDir, "outputFile": "flv_output.txt"]);
+      // Generate manifest.mpd file command
+      //def manifestCmd = this.generateDASHManifestCommand(targetVideoDir);
+      // Set the manifest file command to "", it will be generated once all the other steams are created.
+      commands.add(["command": "", "workDir": targetVideoDir, "outputFile": "manifest_output.txt"]);
+      return commands;
    }
 
    /**
@@ -414,7 +467,7 @@ class MediaTranscodeClass
    * @param cmd the video encoding command to execute
    */
    def runVideoEncoding(cmd){
-      def timeOut = 3600000;//Todo: calculate the estimated time of the video encode
+      def timeOut = 2147483647;//Todo: calculate the estimated time of the video encode
       this.commandRunner.run(cmd, '', timeOut);
    }
    
@@ -423,7 +476,7 @@ class MediaTranscodeClass
    * @param cmd the audio encoding command to execute
    */
    def runAudioEncoding(cmd){
-      def timeOut = 3600000;//Todo: calculate the estimated time of the audio encode
+      def timeOut = 2147483647;//Todo: calculate the estimated time of the audio encode
       this.commandRunner.run(cmd, '', timeOut);
    }
 
@@ -471,11 +524,12 @@ class MediaTranscodeClass
    }  
 
    /**
-   * Generate the DASH manifest xml file
+   * Generate the DASH manifest xml file command
    * @param streamDirectory the directory that contains all video and audio stream files
    * @return the created manifest file path
    */
-   def generateDASHManifest(streamsDirectory){
+   def generateDASHManifestCommand(streamsDirectory){
+      ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
       // Check if the directory exists
       File dir = new File(streamsDirectory);
       if(dir.exists()){
@@ -486,15 +540,17 @@ class MediaTranscodeClass
             // Sort all stream by size
             streams = streams.findAll { it.isFile() }.sort { it.length() };
             def audioStream = streams[0].getPath();
-            ArrayList&lt;String&gt; cmdAL = new ArrayList&lt;String&gt;();
             cmdAL.add('ffmpeg');
             cmdAL.add('-y');
+            cmdAL.add('-progress');
+            def outputFilename = "manifest_output.txt";
+            cmdAL.add(streamsDirectory + '/' + outputFilename) ;
             ArrayList&lt;String&gt; param1AL = new ArrayList&lt;String&gt;();
             param1AL.add('-c');
             param1AL.add('copy');
             ArrayList&lt;String&gt; param2AL = new ArrayList&lt;String&gt;();
             param2AL.add('-adaptation_sets');
-            param2AL.add('id=0,streams=0');
+            param2AL.add('"id=0,streams=0');
             def i = 0;
             for(stream in streams){
                if(stream.getPath() != audioStream){
@@ -518,22 +574,17 @@ class MediaTranscodeClass
             cmdAL.add(audioStream);
             param1AL.add('-map');
             param1AL.add((streams.size() -1).toString());
-            param2AL.set(1, param2AL.get(1) + ' id=1,streams=' + (streams.size() -1).toString());
+            param2AL.set(1, param2AL.get(1) + ' id=1,streams=' + (streams.size() -1).toString() + '"');
             cmdAL.addAll(param1AL);
             cmdAL.add('-f');
             cmdAL.add('webm_dash_manifest');
             cmdAL.addAll(param2AL);
             cmdAL.add(streamsDirectory + '/manifest.mpd');
-            // Run the command
-            def timeOut = 3600000;//Todo: calculate the estimated time of the manifest file generation
-            def rep = this.commandRunner.run(cmdAL, '', timeOut);
-            return streamsDirectory + '/' + 'manifest.mpd';
+            // Run command in background
+            cmdAL.add("&gt; /dev/null 2&gt;&amp;1 &lt; /dev/null &amp;");
          }
       }
-      else
-      {
-         return "Streams directory not found!";
-      }
+      return this.implodeArrayList(cmdAL, " ");
    }
    
    /**
@@ -562,6 +613,26 @@ class MediaTranscodeClass
          }
       }
       return rep;
+   }
+
+   /**
+   * Method to join array elements of type string
+   * @param inputArray Array which contains strings
+   * @param glueString String between each array element
+   * @return String containing all array elements seperated by glue string
+   */
+   String implodeArrayList(ArrayList&lt;String&gt; AL, String glueString) {
+      String output = "";
+      if (AL.size() &gt; 0) {
+	StringBuilder sb = new StringBuilder();
+	sb.append(AL[0]);
+        for (int i=1; i&lt;AL.size(); i++) {
+	   sb.append(glueString);
+           sb.append(AL[i]);
+	}
+	output = sb.toString();
+      }
+      return output;
    }
 }</content>
 </xwikidoc>
