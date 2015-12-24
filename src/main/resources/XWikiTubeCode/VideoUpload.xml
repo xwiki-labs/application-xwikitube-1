@@ -864,7 +864,8 @@ If this parameter is not mentioned when a document is created for each video.</d
          #set($waitingCmdsJSON = [])
          #if($waitingCommands.size() &gt; 0)
             ## Check if there is no runing command and check also if FFmpeg is not runing
-            #if($runingCommands.size() == 0)
+            #set($ffmpegRunning = $videoUploader.mediaTranscoder.checkFFmpegRunning())
+            #if(!$ffmpegRunning &amp;&amp; $runingCommands.size() == 0)
                ## Start a new command
                #set($nextCmd = $waitingCommands[0])
                #if($nextCmd.outputFile != "" &amp;&amp; !$nextCmd.outputFile.contains("manifest"))

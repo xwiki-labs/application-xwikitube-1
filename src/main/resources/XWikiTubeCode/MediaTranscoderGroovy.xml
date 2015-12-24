@@ -101,6 +101,37 @@ class MediaTranscodeClass
    }
 
    /**
+   * Check if ffmpeg is running
+   * The method is to list all FFmpeg processes and their states and check if there is at least one process running.
+   *
+   * @return true if ffmpeg is running, false otherwise.
+   */
+   def checkFFmpegRunning(){
+      def rep = false;
+      ArrayList&lt;String&gt; cmd = new ArrayList&lt;String&gt;();
+      cmd.add("bash");
+      cmd.add("-c");
+      cmd.add("ps -eo fname,s | grep ffmpeg");
+      def result = this.commandRunner.run(cmd, '', 2147483647);
+      if(result.error == 'none' &amp;&amp; result.ret == "0"){
+         String[] lines = result.stdout.split(System.getProperty("line.separator"));
+         def i = 0;
+         def stop = false;
+         while (i &lt; lines.size() &amp;&amp; !stop) {
+            def line = lines[i];
+            def processState = line.replace("ffmpeg ", "");
+            // Check the process state: (T: stopped, X: dead, Z: zombie ),
+            if(processState != "T" &amp;&amp; processState != "X" &amp;&amp; processState != "Z"){
+               stop = false;
+               rep = true;
+            }
+            i++;
+         }
+      }
+      return rep;
+   }
+
+   /**
    * Return the duration of a video
    * 
    * @param videoPath the path of the video file in the filesystem
