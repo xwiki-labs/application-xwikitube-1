@@ -79,7 +79,7 @@
       &lt;/select&gt;
       &lt;input type="button" value="Encode" id="encode-video-btn" class="btn btn-primary"/&gt;
       &lt;/div&gt;
-      &lt;div id="encoding-progress" style="display: none;"&gt;Initialization ...&lt;/div&gt;
+      &lt;div id="encoding-progress" style="display: none;"&gt; &lt;span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"&gt;&lt;/span&gt; Initialization ...&lt;/div&gt;
    &lt;/div&gt;
 #end
 {{/velocity}}</content>

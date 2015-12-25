@@ -134,7 +134,13 @@ var messages = {
   init_fail: "The initialization phase has failed.",
   retry: "please retry!",
   attachment_not_found: "No such attachment!",
-  document_not_found: "No such document!"
+  document_not_found: "No such document!",
+  start_encoding: "Starting video encoding.",
+  view_video: "View the video",
+  attach_files: "Attaching encoded files to the document.",
+  complete: "Complete",
+  in_progress: "In progress",
+  waiting_transcoding_worker: "Waiting for the transcoding worker"
 };
 
 // Configure require.js to use Bootstrap FileStyle (https://github.com/markusslima/bootstrap-filestyle)
@@ -161,6 +167,10 @@ function displayError(selector, msg){
    $(selector).html('&lt;p class="bg-danger"&gt;' + msg + '&lt;/p&gt;')
 }
 
+function displayAjaxLoader(){;
+   return '&lt;span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"&gt;&lt;/span&gt;';
+}
+
 function displayProgressBar(val){
 var html = '&lt;div class="progress"&gt;';
   html += '&lt;div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="' + val + '" aria-valuemin="0" aria-valuemax="100" style="width: ' + val + '%"&gt;';
@@ -174,13 +184,13 @@ var html = '&lt;div class="progress"&gt;';
 function displayCommandsProgress(commands, status, resultsContainer){
    var details = "";
    if(status == "complete"){
-      details = "Complete";
+      details = messages.complete;
    }
    else if(status == "waiting"){
-      details = "Waiting for the transcoding worker";
+      details = messages.waiting_transcoding_worker;
    }
-   else if(status == "runing"){
-      details = "In progress";
+   else if(status == "running"){
+      details = messages.in_progress;
    }
 
    for(var i= 0;i&lt;commands.size();i++){
@@ -211,7 +221,7 @@ function checkVideoEncodingProcess(videoDocRef, videoName){
                displayCommandsProgress(rep.completeCmds, "complete", resultsContainer);
             }
             if(rep.runingCmds &amp;&amp; rep.runingCmds.size() &gt; 0){
-               displayCommandsProgress(rep.runingCmds, "runing", resultsContainer);
+               displayCommandsProgress(rep.runingCmds, "running", resultsContainer);
             }
             if(rep.waitingCmds &amp;&amp; rep.waitingCmds.size() &gt; 0){
                displayCommandsProgress(rep.waitingCmds, "waiting", resultsContainer);
@@ -220,13 +230,13 @@ function checkVideoEncodingProcess(videoDocRef, videoName){
          if(rep.completeCmds.size() &gt; 0 &amp;&amp; rep.waitingCmds.size() == 0 &amp;&amp; rep.runingCmds.size() == 0){
             clearTimeout(timer);
             // Attach the generated video/audio/manifest files to the document
-            $(resultsContainer).append('&lt;div&gt;Attaching encoded files to the document ...&lt;/div&gt;');
+            $(resultsContainer).append('&lt;div&gt;' + displayAjaxLoader() + ' ' + messages.attach_files + ' ...&lt;/div&gt;');
             $.ajax({
                url: ajaxActionsURL + '&amp;action=attachEncodedFiles'  + "&amp;videoDocRef=" + videoDocRef + "&amp;videoName=" + videoName,
                dataType: 'json'
             }).done(function(rep){
                if(rep){
-                  $(resultsContainer).html('&lt;div class="box successmessage"&gt;' + messages.encode_succes + ' &lt;a href="javascript: location.reload(true)"&gt;View the video&lt;/a&gt;&lt;/div&gt;');
+                  $(resultsContainer).html('&lt;div class="box successmessage"&gt;' + messages.encode_succes + ' &lt;a href="javascript: location.reload(true)"&gt;' + messages.view_video + '&lt;/a&gt;&lt;/div&gt;');
                }
             });
          }
@@ -273,6 +283,13 @@ $(function(){
 
   // Initialize encode button
   $("body").on("click", "#encode-video-btn", function(event){
+     $("#videoInput").attr("disabled", true);
+     $("#video-upload-form .bootstrap-filestyle").remove();
+     $("#video-upload-form .video-uploader-container").css("padding-top", "0");
+     $("#video-upload-form .file-info, #video-upload-form .progress-info").hide();
+     $("#video-upload-form .upload-status").removeClass("upload-done");
+     $("#video-upload-form .upload-status").addClass("upload-done-status");
+     $("#video-upload-form .buttonwrapper").hide();
      require(['xwiki-meta'], function (xm) {
         var videoName = $("#video-select").val();
         var videoDocRef = xm.document;
@@ -287,7 +304,7 @@ $(function(){
         .done(function(rep){
            $("#select-video-blk").hide();
            if(rep.initStatus){
-              displaySuccess("#encoding-progress", messages.init_success);
+              displaySuccess("#encoding-progress", messages.init_success + " ... " + displayAjaxLoader() + " " + messages.start_encoding);
               // Starting the video transcoding process
               checkVideoEncodingProcess(videoDocRef, videoName);
            }
@@ -454,6 +471,22 @@ $(function(){
 .progress-details{
    font-size: 12px;
    font-style: italic;
+}
+.upload-done-status{
+   background: none;
+   padding: 0;
+}
+.glyphicon-refresh-animate {
+    -animation: spin .7s infinite linear;
+    -webkit-animation: spin2 .7s infinite linear;
+}
+@-webkit-keyframes spin2 {
+    from { -webkit-transform: rotate(0deg);}
+    to { -webkit-transform: rotate(360deg);}
+}
+@keyframes spin {
+    from { transform: scale(1) rotate(0deg);}
+    to { transform: scale(1) rotate(360deg);}
 }</code>
     </property>
     <property>

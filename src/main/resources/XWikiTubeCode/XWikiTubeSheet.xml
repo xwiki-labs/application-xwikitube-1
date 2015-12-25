@@ -395,7 +395,7 @@
        #set($discard = $xwiki.ssx.use("XWikiTubeCode.VideoUpload"))
        #set($discard = $xwiki.jsx.use("XWikiTubeCode.VideoUpload"))
        &lt;div id="encoding-progress"&gt;
-          Displaying the encoding progress ...
+          &lt;span class="glyphicon glyphicon-refresh glyphicon-refresh-animate"&gt;&lt;/span&gt; Displaying the encoding progress ...
           &lt;input type="hidden" id="encodingInProgress" value="1"/&gt;
           &lt;input type="hidden" id="videoDocRef" value="$doc.documentReference"/&gt;
           &lt;input type="hidden" id="videoName" value="$originalMediaObj.getValue('name')"/&gt;
@@ -426,7 +426,7 @@
 
                       &lt;/div&gt;
                    &lt;/div&gt;
-                   &lt;h5&gt;Published on $datetool.get('default','short') &lt;/h5&gt;
+                   &lt;h5&gt;Published on $xwiki.formatDate($doc.creationDate, "d MMM Y H:m") &lt;/h5&gt;
                    &lt;p&gt;
                    $doc.display('description')    
                    &lt;/p&gt;
@@ -460,7 +460,7 @@
           &lt;/div&gt;
        #end
     #end
-    #if ( ($xcontext.action == "edit") || ($xcontext.action == "view" &amp;&amp; !$originalMediaObj))
+    #if ( ($xcontext.action == "edit") || ($xcontext.action == "view" &amp;&amp; $originalMediaObj))
     (% class="xform video-advanced" %)
     (((
     ; &lt;label for="XWikiTubeCode.XWikiTubeClass_0_title"&gt;$escapetool.xml($doc.displayPrettyName('title', false, false))&lt;/label&gt;
